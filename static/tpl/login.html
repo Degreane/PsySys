@@ -1,0 +1,31 @@
+{% extends "siteTpl.html" %}
+{% block title_html %} AdySys &reg;&copy;LogIn {% endblock %}
+{% block content_html %} <div id="lgnRactivePlaceHolder"></div> {% endblock %}
+{% block ractive_html %} 
+    <script id="login" type="text/ractive-x">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-xs-6 col-xs-offset-3">
+                    <div class="panel panel-primary">
+                        <div class="panel-heading">
+                            <h3 class="panel-title text-center logo">
+                                LogIn
+                            </h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </script>
+{% endblock %}
+
+{% block ractive_js %} 
+    <script id="loginJs" type="text/javascript">    
+            var app= new Ractive({
+                delimiters:['<%=','%>'],
+                template:"#login",
+                el:'#lgnRactivePlaceHolder'
+            })
+    </script>
+{% endblock %}
+        

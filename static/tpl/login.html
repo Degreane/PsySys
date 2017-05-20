@@ -92,6 +92,7 @@
                     }
                     if (this.get('lgnPassErr') == null && this.get('lgnNameErr') == null ){
                         this.set('authenticating',true)
+                        console.log('Connected Enc ',enc)
                         socketIO.send(JSON.stringify({'lgnName':lgnName,'lgnPass':lgnPass}))
                     }
                     /*setTimeout(function(){

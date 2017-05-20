@@ -36,7 +36,8 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
-    'django.contrib.staticfiles'
+    'django.contrib.staticfiles',
+    'channels'
 ]
 
 MIDDLEWARE = [
@@ -126,5 +127,9 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = (
     os.path.abspath(os.path.join(BASE_DIR,"static/")),
 )
-
-
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "asgiref.inmemory.ChannelLayer",
+        "ROUTING": "AdySys.routing.channel_routing",
+        },
+}

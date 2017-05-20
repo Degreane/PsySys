@@ -5,17 +5,64 @@
     <script id="login" type="text/ractive-x">
         <div class="container-fluid">
             <div class="row">
-                <div class="col-xs-6 col-xs-offset-3">
-                    <div class="panel panel-primary">
+                <div class="col-sm-4 col-sm-offset-4">
+                    <div class="panel panel-primary boxMe">
                         <div class="panel-heading">
                             <h3 class="panel-title text-center logo">
                                 LogIn
                             </h3>
                         </div>
+                        <div class="panel-body">
+                            <form class="form-horizontal">
+                                <div class="form-group ">
+                                    <label for="lgnName" class="col-sm-2 control-label"> UserName :</label>
+                                    <div class="col-sm-10">
+                                        <input type="text" placeholder="UserName : " class="form-control text-center" id="lgnName" value="<%= lgnName %>">
+                                        <%= #if lgnNameErr %>
+                                            <div class="textMe-Error boxed text-center">
+                                                <%= lgnNameErr %>
+                                            </div>
+                                        <%= /if %>
+                                    </div>
+                                </div>
+                                <div class="form-group ">
+                                    <label for="lgnPass" class="col-sm-2 control-label"> PassWord :</label>
+                                    <div class="col-sm-10">
+                                        <input type="password" placeholder="Pass Code : " class="form-control text-center" id="lgnPass" value="<%= lgnPass %>">
+                                        <%= #if lgnPassErr %>
+                                            <div class="textMe-Error boxed text-center">
+                                                <%= lgnPassErr %>
+                                            </div>
+                                        <%= /if %>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-sm-10 col-sm-offset-2">
+                                        <a href="#" class="btn btn-primary btnMe" id="lgnBtn" on-click="@this.signin(),false">Sign In</a>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
+        <%= #if authenticating %>
+            <div class="modal fade in " tabindex="-1" role="dialog" data-show="true" style="display: block;background-color: rgba(0,0,0,0.8);opacity: 1;">
+                <div class="modal-dialog" role="document">
+                  <div class="modal-content">
+                    <div class="modal-body text-center">
+                      <p>Authenticating User<br>Please Hold On </p>
+                      <i class="fa fa-cog fa-spin fa-3x"></i>
+                      <i class="fa fa-cog fa-spin fa-4x"></i>
+                      <i class="fa fa-cog fa-spin fa-5x"></i>
+                      <i class="fa fa-cog fa-spin fa-4x"></i>
+                      <i class="fa fa-cog fa-spin fa-3x"></i>
+                    </div>
+                  </div>
+                </div>
+              </div>
+        <%= /if %>
     </script>
 {% endblock %}
 
@@ -24,7 +71,33 @@
             var app= new Ractive({
                 delimiters:['<%=','%>'],
                 template:"#login",
-                el:'#lgnRactivePlaceHolder'
+                el:'#lgnRactivePlaceHolder',
+                data: {
+                    lgnName:'',
+                    lgnPass:''
+                },
+                signin:function(){
+                    var MySelf=this;
+                    lgnName=this.get('lgnName')
+                    lgnPass=this.get('lgnPass')
+                    if(lgnName.trim().length == 0){
+                        this.set('lgnNameErr',"UserName Can Not be empty")
+                    }else{
+                        this.set('lgnNameErr',null)
+                    }
+                    if(lgnPass.trim().length == 0){
+                        this.set('lgnPassErr',"PassWord Can Not be empty")
+                    }else{
+                        this.set('lgnPassErr',null)
+                    }
+                    if (this.get('lgnPassErr') == null && this.get('lgnNameErr') == null ){
+                        this.set('authenticating',true)
+                        socketIO.send(JSON.stringify({'lgnName':lgnName,'lgnPass':lgnPass}))
+                    }
+                    /*setTimeout(function(){
+                        MySelf.set('authenticating',null)
+                    },5000)*/
+                }
             })
     </script>
 {% endblock %}

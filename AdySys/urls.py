@@ -15,10 +15,12 @@ Including another URLconf
 """
 from django.conf.urls import url
 from django.contrib import admin
+from django.conf.urls import include
 from Clients import views as BaseAdySys
 from AdySys import views as Generic
 urlpatterns = [
     url(r'^$',BaseAdySys.index),
     url(r'^admin/', admin.site.urls),
-    url(r'^login.sys$',Generic.index,name="login")
+    url(r'^login.sys$',Generic.index,name="login"),
+    #url("", include('django_socketio.urls'))
 ]

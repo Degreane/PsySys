@@ -15,3 +15,4 @@ def index(request):
         return render(request,'index.html',{"tpls":clients})
     else :
         return HttpResponseRedirect('/login.sys')
+        

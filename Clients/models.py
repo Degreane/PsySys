@@ -38,6 +38,8 @@ class user(mg.Document):
     Ip=mg.StringField()
     MAC=mg.StringField()
     Expires=mg.DateTimeField()
+    Down=mg.IntField()
+    Up=mg.IntField()
     
 
 # Create your models here.

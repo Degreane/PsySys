@@ -20,6 +20,7 @@ from Clients import views as BaseAdySys
 from AdySys import views as Generic
 urlpatterns = [
     url(r'^$',BaseAdySys.index),
+    url(r'^id/index.html',BaseAdySys.index),
     url(r'^admin/', admin.site.urls),
     url(r'^login.sys$',Generic.index,name="login"),
     #url("", include('django_socketio.urls'))

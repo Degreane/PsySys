@@ -3,7 +3,8 @@
     <head>
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>{% block title_html %} {% endblock %}</title>
-        <script type="text/javascript" src="{% static 'js/jquery-3.2.1.slim.min.js'%}" ></script>
+        <script type="text/javascript" src="{% static 'js/jquery-3.2.1.min.js'%}" ></script>
+        <script type="text/javascript" src="{% static 'js/js.cookie.js' %}"></script>
         <script type="text/javascript" src="{% static 'js/ractive.js'%}"></script>
         <link href="{% static 'css/bootstrap.min.css'%}" rel="stylesheet" type="text/css"/>
         <link href="{% static 'css/font-awesome.min.css'%}" rel="stylesheet" type="text/css"/>
@@ -13,12 +14,6 @@
         <script type="text/javascript">
             var socketIO = new WebSocket('ws://' + window.location.host+'/id/')
             var enc=null
-            socketIO.onmessage=function(event){
-                var data =JSON.parse(event['data'])
-                if(data.hasOwnProperty('enc')){
-                    enc=data['enc']
-                }
-            }
         </script>
         {% block header_script %}{% endblock %}
     </head>

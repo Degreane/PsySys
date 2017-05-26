@@ -1,8 +1,8 @@
 from channels.auth import channel_session_user,channel_session_user_from_http,http_session
 from channels.routing import route, route_class
 from channels.sessions import channel_and_http_session,channel_session
-from Crypto.Hash import MD5
 import json
+import pprint as pp
 from django.http import HttpResponse
 from django.http import HttpResponseRedirect
 
@@ -49,13 +49,14 @@ def decrypt(data,  password, key_length=32):
 @channel_session_user
 def connectedChannel(message):
 	print("Message Connected decrypting in Clients")
-	print message.__dict__
+	pp.pprint(message.__dict__)
 	#print apps.get_models()
 	#pp.pprint(message["text"])
 	# the message["text"] is base64 encoded so it should be decoded accordingly. before being sent to decryptor.
 	# the encKey is personal for each connected host thus no two hosts derive the same encKey thus security is attained.
 	encKey=MD5.new(str(message.reply_channel)).hexdigest()
 	decryptedJSON=decrypt(b64decode(message['text']),encKey)
+	print("\tEncKey is {}\n\tMessage is {}\n\tDecryptJson is {}\n".format(encKey,message['text'],decryptedJSON))
 	# next parse content of decryptedJSON into a formal JSON
 	messageJSON=json.loads(decryptedJSON)
 	if messageJSON["target"] == 'login':
@@ -65,6 +66,7 @@ def connectedChannel(message):
 			#set redirect page
 			redirectPage="/index.html?lgnName={}&lgnPass={}".format(messageJSON['lgnName'],messageJSON['lgnPass'])
 			encryptedRedirectPage=b64encode(encrypt(redirectPage,encKey))
+			print("\t#################\n\tRedirectPage is {}\n\tEncKey is {}\n".format(encryptedRedirectPage,encKey))
 			#print dir(message.http_session)
 			#message.http_session={"LoggedIn":True}
 			#print message.http_session.keys()
@@ -89,10 +91,17 @@ def connectChannelid(message):
 	message.reply_channel.send({'accept':True,
                                 'text':json.dumps({'enc':MD5.new(str(message.reply_channel)).hexdigest()})
                                 })
+@channel_and_http_session
+def processRequest(request):
+	print("Processing Request ")
+	pp.pprint(request.__dict__)
+	pp.pprint(request.__dict__['http_session'].__dict__)
+	pp.pprint(request.__dict__['channel_session'].__dict__)
 # routes defined for channel calls
 # this is similar to the Django urls, but specifically for Channels
 
 channel_routing = [
+       route('http.request',processRequest),
        route('websocket.connect',connectChannelid),
        route('websocket.receive',connectedChannel)
 ]

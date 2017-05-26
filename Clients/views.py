@@ -8,6 +8,7 @@ from django.conf import settings
 from models import user
 from urlparse import parse_qs
 
+from hashlib import md5
 from Crypto.Hash import MD5
 from Crypto import Random
 from Crypto.Cipher import AES
@@ -59,11 +60,18 @@ def index(request):
     thePath=request.__dict__['path']
     if thePath=='/id/index.html':
         # if this is the path then we assume here we are initializing login/logout so we check 
-        pp.pprint(request.__dict__)
-        reqQueryString=request.GET.urlencode()
-        print(parse_qs(reqQueryString))
-        print("QueryString is {}".format(reqQueryString))
-    print "The reqSessionID is {} = {}".format(reqSessionID,encKey)
+        #pp.pprint(request.__dict__)
+        reqQueryString=parse_qs(request.GET.urlencode())
+        #print(parse_qs(reqQueryString))
+        #print("QueryString is {}".format(reqQueryString))
+        # Now since we got the QueryString We check Existance of ver which should contain previous lgnName/lgnPass conducted here within.
+        if reqQueryString.has_key('ver'):
+            # Now We have the QueryString key and thus we validate the decrypted with the database from Model User
+            pp.pprint(reqQueryString['ver'][0])
+            print "The reqSessionID is {} = {}".format(reqSessionID,encKey)
+            decryptedValues=decrypt(b64decode(reqQueryString['ver'][0]),encKey)
+            pp.pprint(decryptedValues)
+    
     print("############ R2 ###############")
     request.session.set_expiry(300)
     if request.session.has_key('LoggedIn'):

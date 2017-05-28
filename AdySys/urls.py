@@ -18,6 +18,9 @@ from django.contrib import admin
 from django.conf.urls import include
 from Clients import views as BaseAdySys
 from AdySys import views as Generic
+import os
+
+
 urlpatterns = [
     url(r'^$',BaseAdySys.index),
     url(r'^id/index.html',BaseAdySys.index),
@@ -25,3 +28,7 @@ urlpatterns = [
     url(r'^login.sys$',Generic.index,name="login"),
     #url("", include('django_socketio.urls'))
 ]
+try :
+	os.mkdir("/tmp/DjangoTemp")
+except Exception,e:
+	print("{}".format(e))

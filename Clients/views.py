@@ -14,6 +14,8 @@ from Crypto import Random
 from Crypto.Cipher import AES
 from base64 import b64encode,b64decode
 
+import tempfile as tf
+
 def derive_key_and_iv(password, salt, key_length, iv_length):
     d = d_i = ''
     while len(d) < key_length + iv_length:
@@ -52,10 +54,9 @@ def decrypt(data,  password, key_length=32):
 def index(request):
     #return HttpResponse("SomeThing requested {} to be sent back ".format(request))
     print("############ R! ###############")
-    
-    #print "Request Cookie is {}".format(request.session.__dict__['_SessionBase__session_key'])
-    #reqSessionKey=request.session.__dict__['_SessionBase__session_key']
-    reqSessionID=request.__dict__['reply_channel'].__dict__['name']
+    pp.pprint(request.session.__dict__)
+    #pp.pprint(request.session.get('LoggedIn'))
+    reqSessionID=request.session.session_key
     encKey=MD5.new(reqSessionID).hexdigest()
     thePath=request.__dict__['path']
     if thePath=='/id/index.html':
@@ -79,9 +80,8 @@ def index(request):
         return render(request,'index.html',{"tpls":clients})
     else :
         #request.session['LoggedIn']=True
+        
+        request.session["t"]=request.session.session_key
+        request.session.save()
+        pp.pprint("Session Keys after T is {}".format(request.session.__dict__))
         return HttpResponseRedirect('/login.sys')
-    
-#zblpjg3iydoh4e64j8rvdr2rywo0er0p
-#zblpjg3iydoh4e64j8rvdr2rywo0er0p
-#zblpjg3iydoh4e64j8rvdr2rywo0er0p
-#13btkw4j9daae463rjih1r2yjilrstoz

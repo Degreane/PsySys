@@ -46,24 +46,23 @@ def decrypt(data,  password, key_length=32):
 	return padded_text
 
 
-@channel_session_user
+@channel_and_http_session
 def connectedChannel(message):
 	print("Message Connected decrypting in Clients")
-	pp.pprint(message.__dict__)
-	#print apps.get_models()
-	#pp.pprint(message["text"])
-	# the message["text"] is base64 encoded so it should be decoded accordingly. before being sent to decryptor.
-	# the encKey is personal for each connected host thus no two hosts derive the same encKey thus security is attained.
 	encKey=MD5.new(str(message.reply_channel)).hexdigest()
 	decryptedJSON=decrypt(b64decode(message['text']),encKey)
 	print("\tEncKey is {}\n\tMessage is {}\n\tDecryptJson is {}\n".format(encKey,message['text'],decryptedJSON))
-	# next parse content of decryptedJSON into a formal JSON
 	messageJSON=json.loads(decryptedJSON)
 	if messageJSON["target"] == 'login':
 		Client = user.objects(lgnName=messageJSON['lgnName'],lgnPass=messageJSON['lgnPass'] )
 		if Client.count() == 1:
+			pp.pprint(Client.__dict__)
 			#print "Client Accepted"
 			#set redirect page
+			# Note that this time the EncKey is the t taken from the http_session
+			pp.pprint(message.http_session.__dict__)
+			print("<-----------------^^^^------------------->")
+				
 			redirectPage="/index.html?lgnName={}&lgnPass={}".format(messageJSON['lgnName'],messageJSON['lgnPass'])
 			encryptedRedirectPage=b64encode(encrypt(redirectPage,encKey))
 			print("\t#################\n\tRedirectPage is {}\n\tEncKey is {}\n".format(encryptedRedirectPage,encKey))
@@ -73,7 +72,9 @@ def connectedChannel(message):
 			message.reply_channel.send({
 			        'text':json.dumps({'verdict':encryptedRedirectPage})
 			})
-			
+			#message.http_session['LoggedInn']=True
+			#message.http_session['LId']=
+
 		else:
 			#print "Client Not Accepted"
 			redirectPage="False"
@@ -83,11 +84,14 @@ def connectedChannel(message):
 			})			
 
 
-@channel_session_user_from_http
+@channel_and_http_session
 def connectChannelid(message):
-	#print("Getting ID {}".format(str(message.reply_channel)))
-	print "in Clients Routing "
-	print message.__dict__
+	#print("\n#####################\nGetting reply Channel ID {}\n###################\n".format(str(message.reply_channel)))
+	#print("\n#####################\nGetting http session key {}\n###################\n".format(type(message.http_session)))
+	#print("\n#####################\nGetting http session key {}\n###################\n".format(message.http_session.keys()))
+	#print("\n#####################\nGetting http session key {}\n###################\n".format(str(message.http_session.session_key)))
+	#print "in Clients Routing "
+	#print message.__dict__
 	message.reply_channel.send({'accept':True,
                                 'text':json.dumps({'enc':MD5.new(str(message.reply_channel)).hexdigest()})
                                 })
@@ -95,13 +99,24 @@ def connectChannelid(message):
 def processRequest(request):
 	print("Processing Request ")
 	pp.pprint(request.__dict__)
+	pp.pprint(request.__dict__['http_session'])
+	request.__dict__['http_session'].create()
+	request.__dict__['http_session']['LoggedIn']=True
+	#request.__dict__['http_session'].save(must_create=True)
 	pp.pprint(request.__dict__['http_session'].__dict__)
+	request.__dict__['channel_session'].__dict__['_session_cache']['LoggedIn']=True
+	request.__dict__['channel_session'].save()
 	pp.pprint(request.__dict__['channel_session'].__dict__)
+	pp.pprint(dir(request))
+	pp.pprint(dir(request.__dict__['channel_session']))
+	pp.pprint(dir(request.__dict__['http_session']))
+	print request.__dict__['channel_session'].get('LoggedIn')
+	print request.__dict__['http_session'].get('LoggedIn')
 # routes defined for channel calls
 # this is similar to the Django urls, but specifically for Channels
 
 channel_routing = [
-       route('http.request',processRequest),
+       #route('http.request',processRequest),
        route('websocket.connect',connectChannelid),
        route('websocket.receive',connectedChannel)
 ]

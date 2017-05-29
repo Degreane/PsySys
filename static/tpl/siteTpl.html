@@ -2,7 +2,7 @@
 <html>
     <head>
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>{% block title_html %} {% endblock %}</title>
+        <title>{% block title_html %} AdySys &copy;&reg;{% endblock %}</title>
         <script type="text/javascript" src="{% static 'js/jquery-3.2.1.min.js'%}" ></script>
         <script type="text/javascript" src="{% static 'js/js.cookie.js' %}"></script>
         <script type="text/javascript" src="{% static 'js/ractive.js'%}"></script>
@@ -32,7 +32,7 @@
                     </div>
                     <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
                         <ul class="nav navbar-nav navbar-right">
-                            <li><a href="#" class="logo">LogIn</a></li>
+                            {% block lgnInlgnOut %}<li><a href="#" id="LogInBtn" class="logo">LogIn</a></li> {% endblock %}
                         </ul>
                     </div>
                 </div>

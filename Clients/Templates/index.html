@@ -1,3 +1,47 @@
 {% extends 'siteTpl.html' %}
 {% load staticfiles %}
-{% block title_html %} Welcome Back {% endblock %}
+{% block title_html %} 
+    
+    Welcome {{ theUser.firstName }} {{ theUser.lastName }} 
+
+{% endblock %}
+{% block navbar_brand %} <span id="NavBarBrand">  </span> {% endblock %}
+{% block lgnInlgnOut %} <li><a href="/LogOut" id="lgnOut" class="logo" >LogOut</a></li> {% endblock %}
+
+{% block ractive_html %}
+<!-- Here We should Update the system into Having Our Ractive Working as it should !-->
+<script id="NavBarBrandTpl" type="text/ractive-x">
+    <%= CU.lgnName %>
+</script>
+{% endblock %}
+{% block ractive_js %} 
+    <script id="iPageJS" type="text/javascript">
+            /*var theUser='{{ theUser }}'
+                theUser=JSON.parse($('<div/>').html(theUser).text())*/
+            var app= new Ractive({
+                delimiters:['<%=','%>'],
+                template:"#NavBarBrandTpl",
+                el:'#NavBarBrand',
+                data: {
+                    CU:{}
+                    }
+                })
+                socketIO.onmessage=function(event){
+                    var data =JSON.parse(event['data'])
+                    if(data.hasOwnProperty('enc')){
+                        enc=data['enc']
+                        /*
+                            Next is request for the Current User CU
+                        */
+                        socketIO.send(CryptoJS.AES.encrypt(JSON.stringify({'id':'{{ theUser.id }}','target':'CU'}),enc))
+                    }
+                    if(data.hasOwnProperty('CU')){
+                        /*
+                            Lets Decode 
+                        */
+                        var CU=JSON.parse(CryptoJS.AES.decrypt(data['CU'],enc).toString(CryptoJS.enc.Utf8))
+                        app.set('CU',CU)
+                    }
+                }
+    </script>
+{% endblock %}

@@ -14,3 +14,12 @@ def index(request):
     #print(request.session["t"])
     #print("###############<<>>################")
     return render(request,'login.html')
+
+def logout(request):
+    pp.pprint(dir(request.session))
+    request.session.clear()
+    request.session.flush()
+    request.session.save()
+    return HttpResponseRedirect('/')
+    
+        

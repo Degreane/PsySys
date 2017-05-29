@@ -54,38 +54,38 @@ def connectedChannel(message):
 	decryptedJSON=decrypt(b64decode(message['text']),encKey)
 	print("\tEncKey is {}\n\tMessage is {}\n\tDecryptJson is {}\n".format(encKey,message['text'],decryptedJSON))
 	messageJSON=json.loads(decryptedJSON)
-	if messageJSON["target"] == 'login' and message.http_session.has_key('u'):
+	if messageJSON["target"] == 'login' and message.http_session.has_key('t'):
 		Client = user.objects(lgnName=messageJSON['lgnName'],lgnPass=messageJSON['lgnPass'] )
 		if Client.count() == 1:
-			pp.pprint(Client.__dict__)
-			#print "Client Accepted"
-			#set redirect page
-			# Note that this time the EncKey is the t taken from the http_session
-			#pp.pprint(message.http_session.keys())
-			SessEncKey=MD5.new(str(message.http_session['u'])).hexdigest()
-			print(SessEncKey," Encrypted New Sess Key ")
-			print("<-----------------^^^^------------------->")
-				
-			redirectPage="/index.html?lgnName={}&lgnPass={}".format(messageJSON['lgnName'],messageJSON['lgnPass'])
-			encryptedRedirectPage=b64encode(encrypt(redirectPage,SessEncKey))
-			print("\t#################\n\tRedirectPage is {}\n\tEncKey is {}\n".format(encryptedRedirectPage,SessEncKey))
-			#print dir(message.http_session)
-			#message.http_session={"LoggedIn":True}
-			#print message.http_session.keys()
+			#pp.pprint(Client.__dict__)
+			SessEncKey=MD5.new(str(message.http_session['t'])).hexdigest()
+			#print(str(message.http_session.session_key)," Session Passed In  Key")
+			#print(SessEncKey," Encrypted New Sess Key ")
+			#print("<-----------------^^^^------------------->")
+			redirectParam="lgnName={}&lgnPass={}".format(messageJSON['lgnName'],messageJSON['lgnPass'])
+			redirectPage="/index.html"
+			encryptedRedirectParam=b64encode(encrypt(redirectParam,SessEncKey))
+			#print("\t#################\n\tRedirectPage is {}\n\tEncKey is {}\n".format(encryptedRedirectParam,SessEncKey))
+			#print("Message Connected decrypting in Clients <------------ END")
 			message.reply_channel.send({
-			        'text':json.dumps({'verdict':encryptedRedirectPage})
+			        'text':json.dumps({'verdict':encryptedRedirectParam,'redirect':redirectPage})
 			})
-			#message.http_session['LoggedInn']=True
-			#message.http_session['LId']=
-
 		else:
-			#print "Client Not Accepted"
-			redirectPage="False"
-			encryptedRedirectPage=b64encode(encrypt(redirectPage,encKey))
 			message.reply_channel.send({
-			        'text':json.dumps({'verdict':encryptedRedirectPage})
-			})			
-
+			        'text':json.dumps({'verdict':False})
+			})
+	elif messageJSON["target"] == 'CU' :
+		CU=user.objects(pk=messageJSON['id'])
+		if CU.count() == 1:
+			# here the encKey is the reply_channel taken above
+			CUData=CU[0]
+			CUJsonStr=CUData.to_json()
+			encryptedCUJsonStr=b64encode(encrypt(CUJsonStr,encKey))
+			pp.pprint(encryptedCUJsonStr)
+			pp.pprint(CUJsonStr)			
+			message.reply_channel.send({
+			        'text':json.dumps({'CU':encryptedCUJsonStr})
+			})
 
 @channel_and_http_session
 def connectChannelid(message):

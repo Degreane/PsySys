@@ -113,23 +113,20 @@
                     enc=data['enc']
                 }
                 if(data.hasOwnProperty('verdict')){
-                    verdict=CryptoJS.AES.decrypt(data['verdict'],enc).toString(CryptoJS.enc.Utf8)
-                    console.log(" The Verdict ",verdict)
-                    if(verdict == "False") {
+                    verdict=data['verdict']
+                    console.log(verdict)
+                    if (verdict== false) {
                         app.set('lgnNameErr',"Incorrect UserName/Password")
                         setTimeout(function(){app.set('authenticating',null)},3000)
-                    }else{
-                        console.log(verdict)
-                        $.ajax({
-                            type: "GET",
-                            url: "/id"+verdict.split('?')[0],
-                            data: {ver:data['verdict']},
-                            success:function(res){
-                                console.log(res)
-                            }
-                          });
                     }
+                    if(data.hasOwnProperty('redirect')){
+                        redirectTo=data['redirect']+"?verdict="+verdict
+                        console.log("redirecting to ",data['redirect']+"?verdict="+verdict)
+                        window.location=redirectTo
+                    }
+                    
                 }
+                
             }
     </script>
 {% endblock %}

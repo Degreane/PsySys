@@ -23,9 +23,10 @@ import os
 
 urlpatterns = [
     url(r'^$',BaseAdySys.index),
-    url(r'^id/index.html',BaseAdySys.index),
+    url(r'^index.html',BaseAdySys.index),
     url(r'^admin/', admin.site.urls),
     url(r'^login.sys$',Generic.index,name="login"),
+    url(r'^LogOut',Generic.logout)
     #url("", include('django_socketio.urls'))
 ]
 try :

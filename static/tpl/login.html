@@ -114,6 +114,7 @@
                 }
                 if(data.hasOwnProperty('verdict')){
                     verdict=CryptoJS.AES.decrypt(data['verdict'],enc).toString(CryptoJS.enc.Utf8)
+                    console.log(" The Verdict ",verdict)
                     if(verdict == "False") {
                         app.set('lgnNameErr',"Incorrect UserName/Password")
                         setTimeout(function(){app.set('authenticating',null)},3000)

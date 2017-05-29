@@ -11,19 +11,195 @@
 {% block ractive_html %}
 <!-- Here We should Update the system into Having Our Ractive Working as it should !-->
 <script id="NavBarBrandTpl" type="text/ractive-x">
+    <a class="navbar-brand logo" href="#" on-click="@this.ViewCU(),false">
     <%= CU.lgnName %>
+    </a>
+    <%= #if ViewCU %>
+    
+            <div class="modal fade in " tabindex="-1" role="dialog" data-show="true" style="display: block;background-color: rgba(0,0,0,0.8);opacity: 1;overflow:auto;">
+                <div class="modal-dialog" role="document" style="width:70%;">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" on-click="@this.CloseCU(),false"><i class="fa fa-times-circle" aria-hidden="true"></i></button>
+                        <h4 class="modal-title text-center logo "><%= CU.firstName %> <%= CU.lastName %> </h4>
+                    </div>
+                    <div class="modal-body text-center">
+                      <div class="container-fluid">
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <div class="panel panel-primary">
+                                    <div class="panel-body">
+                                        <form class="form-horizontal">
+                                            <div class="form-group ">
+                                                <label for="lgnName" class="col-sm-2 control-label"> UserName :</label>
+                                                <div class="col-sm-4">
+                                                    <input type="text" placeholder="UserName : " class="form-control text-center" id="lgnName" value="<%= CU.lgnName %>">
+                                                    <%= #if lgnNameErr %>
+                                                        <div class="textMe-Error boxed text-center">
+                                                            <%= lgnNameErr %>
+                                                        </div>
+                                                    <%= /if %>
+                                                </div>
+                                                <label for="lgnPass" class="col-sm-2 control-label"> PassWord :</label>
+                                                <div class="col-sm-4">
+                                                    <input type="password" placeholder="PassWord : " class="form-control text-center" id="lgnPass" value="<%= CU.lgnPass %>">
+                                                    <%= #if lgnPassErr %>
+                                                        <div class="textMe-Error boxed text-center">
+                                                            <%= lgnPassErr %>
+                                                        </div>
+                                                    <%= /if %>
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="firstName" class="col-sm-2 control-label"> First Name :</label>
+                                                <div class="col-sm-4">
+                                                    <input type="text" placeholder="FirstName : " class="form-control text-center" id="firstName" value="<%= CU.firstName %>">
+                                                </div>
+                                                <label for="lastName" class="col-sm-2 control-label"> Last Name :</label>
+                                                <div class="col-sm-4">
+                                                    <input type="text" placeholder="Last Name : " class="form-control text-center" id="lastName" value="<%= CU.lastName %>">
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="Desc" class="col-sm-2 control-label"> Description :</label>
+                                                <div class="col-sm-10">
+                                                    <textarea type="text" placeholder="Description : " class="form-control text-center" id="Desc" ><%= CU.Desc %></textarea>
+                                                </div>
+                                            </div>
+                                            <%= #if CU.isAdmin %>
+                                                <div class="form-group">
+                                                <label for="Comment" class="col-sm-2 control-label"> Comment :</label>
+                                                <div class="col-sm-10">
+                                                    <textarea type="text" placeholder="Comment : " class="form-control text-center" id="Comment" ><%= CU.Comment %></textarea>
+                                                </div>
+                                            </div>
+                                            <%= /if %>
+                                            <div class="form-group">
+                                                <label for="createdAt" class="col-sm-2 control-label"> Created At :</label>
+                                                <div class="col-sm-4">
+                                                    <input type="text" placeholder="Created At : " class="form-control text-center" id="createdAt" disabled value="<%= CU.createdAt %>">
+                                                </div>
+                                                <label for="updatedAt" class="col-sm-2 control-label"> Updated At :</label>
+                                                <div class="col-sm-4">
+                                                    <input type="text" placeholder="Updated At : " class="form-control text-center" id="updatedAt" disabled value="<%= CU.updatedAt %>">
+                                                </div>
+                                            </div>
+                                             <div class="form-group">
+                                                <label for="Country" class="col-sm-2 control-label"> Country :</label>
+                                                <div class="col-sm-4">
+                                                    <input type="text" placeholder="Country : " class="form-control text-center" id="Country" value="<%= CU.Country %>">
+                                                </div>
+                                                <label for="City" class="col-sm-2 control-label"> City :</label>
+                                                <div class="col-sm-4">
+                                                    <input type="text" placeholder="City : " class="form-control text-center" id="City" value="<%= CU.City %>">
+                                                </div>
+                                            </div>
+                                             <div class="form-group">
+                                                <label for="Street" class="col-sm-2 control-label"> Street :</label>
+                                                <div class="col-sm-4">
+                                                    <input type="text" placeholder="Street : " class="form-control text-center" id="Street" value="<%= CU.Street %>">
+                                                </div>
+                                                <label for="Building" class="col-sm-2 control-label"> Building :</label>
+                                                <div class="col-sm-4">
+                                                    <input type="text" placeholder="Building : " class="form-control text-center" id="Building" value="<%= CU.Building %>">
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="Floor" class="col-sm-2 control-label"> Floor :</label>
+                                                <div class="col-sm-4">
+                                                    <input type="text" placeholder="Floor : " class="form-control text-center" id="Floor" value="<%= CU.Floor %>">
+                                                </div>
+                                                <label for="internalID" class="col-sm-2 control-label"> InternalID :</label>
+                                                <div class="col-sm-4">
+                                                    <input type="text" placeholder="InternalID : " class="form-control text-center" id="internalID" disabled value="<%= CU.InternalId %>">
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="EMail" class="col-sm-2 control-label"> E-Mail :</label>
+                                                <div class="col-sm-4">
+                                                    <input type="text" placeholder="E-Mail : " class="form-control text-center" id="EMail" value="<%= CU.Email %>">
+                                                </div>
+                                                <label for="Phone" class="col-sm-2 control-label"> Phone :</label>
+                                                <div class="col-sm-4">
+                                                    <input type="text" placeholder="Phone Number : " class="form-control text-center" id="Phone" value="<%= CU.Phone %>">
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="form-group">
+                                                <label for="Enabled" class="col-sm-2 control-label"> Enabled :</label>
+                                                <div class="col-sm-4">
+                                                    <%= #if CU.Enabled %>
+                                                        <button class="btn btn-success btn-xs boxMe" on-click="@this.toggleEnabled(),false">Enabled</button>
+                                                    <%= else %>
+                                                        <button class="btn btn-danger btn-xs boxMe" on-click="@this.toggleEnabled(),false">Disabled</button>
+                                                    <%= /if %>
+                                                </div>
+                                                <label for="Deleted" class="col-sm-2 control-label"> Deleted :</label>
+                                                <div class="col-sm-4">
+                                                    <%= #if CU.Deleted %>
+                                                        <button class="btn btn-danger btn-xs boxMe" on-click="@this.toggleDeleted(),false">True</button>
+                                                    <%= else %>
+                                                        <button class="btn btn-success btn-xs boxMe" on-click="@this.toggleDeleted(),false">False</button>
+                                                    <%= /if %>
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <div class="col-sm-10 col-sm-offset-1">
+                                                    <button class="btn btn-primary btn-xs boxMe" on-click="@this.updateCU(),false">Update</button>
+                                                    <button class="btn btn-default btn-xs boxMe" on-click="@this.resetCU(),false">Reset</button>
+                                                </div>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                            <i class="fa fa-cog fa-spin fa-3x"></i>
+                            <i class="fa fa-cog fa-spin fa-4x"></i>
+                            <i class="fa fa-cog fa-spin fa-5x"></i>
+                            <i class="fa fa-cog fa-spin fa-4x"></i>
+                            <i class="fa fa-cog fa-spin fa-3x"></i>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+            </div>
+        
+    <%= /if %>
 </script>
 {% endblock %}
 {% block ractive_js %} 
     <script id="iPageJS" type="text/javascript">
-            /*var theUser='{{ theUser }}'
-                theUser=JSON.parse($('<div/>').html(theUser).text())*/
-            var app= new Ractive({
-                delimiters:['<%=','%>'],
-                template:"#NavBarBrandTpl",
-                el:'#NavBarBrand',
-                data: {
-                    CU:{}
+        /*
+            Here we have embedded the ractiveJS inside jquery onRead function
+            for security reasons so that we dont leak the variables back to the window Explorer
+        */
+            $(function(){
+                /*var theUser='{{ theUser }}'
+                    theUser=JSON.parse($('<div/>').html(theUser).text())*/
+                var navbarApp= new Ractive({
+                    delimiters:['<%=','%>'],
+                    template:"#NavBarBrandTpl",
+                    el:'#NavBarBrand',
+                    data: {
+                        CU:{}
+                        },
+                    ViewCU:function(){
+                        var myThis=this;
+                        myThis.set('ViewCU',true)
+                    },CloseCU:function(){
+                        this.set('ViewCU',false)
+                    },toggleEnabled:function(){
+                        this.set('CU.Enabled',!this.get('CU.Enabled'))
+                    },toggleDeleted:function(){
+                        this.set('CU.Deleted',!this.get('CU.Deleted'))
+                    },resetCU:function(){
+                        socketIO.send(CryptoJS.AES.encrypt(JSON.stringify({'id':'{{ theUser.id }}','target':'CU'}),enc))
+                    },updateCU:function(){
+                        /*
+                            Tricky part is in here:
+                        */
+                        socketIO.send(CryptoJS.AES.encrypt(JSON.stringify({'CU':this.get('CU'),'target':'updateCU'}),enc))
                     }
                 })
                 socketIO.onmessage=function(event){
@@ -40,8 +216,12 @@
                             Lets Decode 
                         */
                         var CU=JSON.parse(CryptoJS.AES.decrypt(data['CU'],enc).toString(CryptoJS.enc.Utf8))
-                        app.set('CU',CU)
+                        CU['createdAt']=moment(CU['createdAt']['$date'],'x').toString() || moment()
+                        CU['updatedAt']=moment(CU['updatedAt']['$date'],'x').toString() || moment()
+                        navbarApp.set('CU',CU)
+                        console.log(CU)
                     }
                 }
+            });
     </script>
 {% endblock %}

@@ -86,6 +86,8 @@ def connectedChannel(message):
 			message.reply_channel.send({
 			        'text':json.dumps({'CU':encryptedCUJsonStr})
 			})
+	elif messageJSON["target"]=='updateCU':
+		pp.pprint(messageJSON)
 
 @channel_and_http_session
 def connectChannelid(message):

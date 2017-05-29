@@ -72,7 +72,7 @@ def index(request):
                 pp.pprint(e)
                 print "Due To The Error Above We are redirecting Back to Home Page"
                 print "We are Removing the temporary key Value"
-                del request.session["t"]
+                #del request.session["t"]
                 request.session.clear()
                 request.session.flush()                
                 return HttpResponseRedirect('/')

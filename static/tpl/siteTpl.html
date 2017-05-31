@@ -12,8 +12,20 @@
         <script type="text/javascript" src="{% static 'js/bootstrap.min.js' %}" ></script>
         <script type="text/javascript" src="{% static 'js/crypto-js.js' %}" ></script>
         <script type="text/javascript" src="{% static 'js/moment-with-locales.min.js' %}"></script>
+        <script type="text/javascript" src="{% static 'js/reconnecting-websocket.min.js' %}"></script>
         <script type="text/javascript">
-            var socketIO = new WebSocket('ws://' + window.location.host+'/id/')
+            
+            var socketIO = new ReconnectingWebSocket('ws://' + window.location.host+'/id/')
+            socketIO.onopen=function(){
+                console.log('Connecting To Socket')
+            }
+            socketIO.onclose=function(){
+                console.log('Lost Connection Reconnecting')
+            }
+            socketIO.onerror=function(){
+                console.log('On Error I delay 3000 ms and reconnect')
+            }
+            //console.log(socketIO)
             var enc=null
         </script>
         {% block header_script %}{% endblock %}

@@ -2,6 +2,7 @@ from channels.auth import channel_session_user,channel_session_user_from_http,ht
 from channels.routing import route, route_class
 from channels.sessions import channel_and_http_session,channel_session
 import json
+import copy
 import pprint as pp
 from django.http import HttpResponse
 from django.http import HttpResponseRedirect
@@ -54,6 +55,15 @@ def connectedChannel(message):
 	decryptedJSON=decrypt(b64decode(message['text']),encKey)
 	print("\tEncKey is {}\n\tMessage is {}\n\tDecryptJson is {}\n".format(encKey,message['text'],decryptedJSON))
 	messageJSON=json.loads(decryptedJSON)
+	print type(message.http_session)
+	if message.http_session is None:
+		print("Session type None")
+		redirectPage="/"
+		redirectParam="InvalidSession=true"
+		encryptedRedirectParam=b64encode(encrypt(redirectParam,encKey))
+		message.reply_channel.send({
+		        'text':json.dumps({'verdict':encryptedRedirectParam,'redirect':redirectPage})
+		})		
 	if messageJSON["target"] == 'login' and message.http_session.has_key('t'):
 		Client = user.objects(lgnName=messageJSON['lgnName'],lgnPass=messageJSON['lgnPass'] )
 		if Client.count() == 1:
@@ -81,13 +91,33 @@ def connectedChannel(message):
 			CUData=CU[0]
 			CUJsonStr=CUData.to_json()
 			encryptedCUJsonStr=b64encode(encrypt(CUJsonStr,encKey))
-			pp.pprint(encryptedCUJsonStr)
-			pp.pprint(CUJsonStr)			
+			#pp.pprint(encryptedCUJsonStr)
+			#pp.pprint(CUJsonStr)			
 			message.reply_channel.send({
 			        'text':json.dumps({'CU':encryptedCUJsonStr})
 			})
 	elif messageJSON["target"]=='updateCU':
-		pp.pprint(messageJSON)
+		#here we update the CurrentUser and thus.
+		'''
+		1- Check Contents of Current User
+		'''
+		if messageJSON.has_key('CU') :
+			currentUser = copy.deepcopy(messageJSON['CU'])
+			if currentUser.has_key('_id'):
+				theID=currentUser['_id']['$oid']
+				#get the document that has the specific lgnName
+				lgnNameFetch=user.objects(lgnName=currentUser['lgnName'])
+				if lgnNameFetch.count() == 1:
+					# if we have a match then we get the first Record and get the id
+					if theID == str(lgnNameFetch[0]['id']) :
+						# We can continue 
+						print ("Horray We May Continue")
+					else:
+						returnCode=json.dumps({'Err':"UserName Exists Choose Another"})
+						encryptedErr=b64encode(encrypt(returnCode,encKey))
+						message.reply_channel.send({
+						        'text':json.dumps({'UpdateCU':encryptedErr,'verdict':False})
+						})
 
 @channel_and_http_session
 def connectChannelid(message):

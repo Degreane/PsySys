@@ -221,6 +221,18 @@
                         navbarApp.set('CU',CU)
                         console.log(CU)
                     }
+                    if(data.hasOwnProperty('redirect')){
+                        redirectTo=data['redirect']+"?verdict="+verdict
+                        console.log("redirecting to ",data['redirect']+"?verdict="+verdict)
+                        window.location=redirectTo
+                    }
+                    if(data.hasOwnProperty('UpdateCU')){
+                        // 1- Check if verdict is true or false
+                        if(data.hasOwnProperty('verdict')){
+                            var decryptedMsg=JSON.parse(CryptoJS.AES.decrypt(data['UpdateCU'],enc).toString(CryptoJS.enc.Utf8))
+                            console.log(decryptedMsg)
+                        }
+                    }
                 }
             });
     </script>

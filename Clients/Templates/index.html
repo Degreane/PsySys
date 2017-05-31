@@ -7,9 +7,35 @@
 {% endblock %}
 {% block navbar_brand %} <span id="NavBarBrand">  </span> {% endblock %}
 {% block lgnInlgnOut %} <li><a href="/LogOut" id="lgnOut" class="logo" >LogOut</a></li> {% endblock %}
-
+{% block content_html %} 
+    <span id="HtmlBodyContent"></span>
+{% endblock %}
 {% block ractive_html %}
 <!-- Here We should Update the system into Having Our Ractive Working as it should !-->
+<script id="HtmlBodyContentTpl" type="text/ractive-x">
+    <div class="container-fluid">
+        <div class="row">
+    <%= #if CU.isAdmin %>
+        <div class="col-sm-3">
+            <div class="panel panel-primary">
+                <div class="panel-heading text-center">
+                    <a class="panel-title  logo" href="#AdminIntroPanel" aria-controls="AdminIntroPanel" data-toggle="collapse">
+                        Admin Menu
+                    </a>
+                </div>
+                <div class="panel-body collapse in" id="AdminIntroPanel">
+                        <div class="input-group input-group-sm"><span class="input-group-addon"><i class="fa fa-binoculars"></i></span><input type="text" class="form-control text-center pull-right" placeholder="Quick Search ..."></div><br>
+                        <div><a href="#" class="btnMe">Total &nbsp;&nbsp;<span class="badge badge-notify-green"><%= adm.count %></span></a></div>
+                        <div><a href="#" class="btnMe"> Enabled &nbsp;&nbsp;<span class="badge badge-notify-green"><%= adm.count %></span></a></div>
+                        <div><a href="#" class="btnMe"> Disabled/Deleted &nbsp;&nbsp;<span class="badge badge-notify-green"><%= adm.count %></span></a></div>
+                        <div><a href="#" class="btnMe"> Add New <i class="fa fa-cog"></i></a></div>
+                </div>
+            </div>
+        </div>
+    <%= /if %>
+        </div>
+    </div>
+</script>
 <script id="NavBarBrandTpl" type="text/ractive-x">
     <a class="navbar-brand logo" href="#" on-click="@this.ViewCU(),false">
     <%= CU.lgnName %>
@@ -202,6 +228,18 @@
                         socketIO.send(CryptoJS.AES.encrypt(JSON.stringify({'CU':this.get('CU'),'target':'updateCU'}),enc))
                     }
                 })
+                var htmlBodyContentApp = new Ractive({
+                    delimiters:['<%=','%>'],
+                    template:'#HtmlBodyContentTpl',
+                    el:'#HtmlBodyContent',
+                    data: {
+                        CU:{},
+                        adm:{
+                            list:[],
+                            count:0
+                        }
+                    }
+                })
                 socketIO.onmessage=function(event){
                     var data =JSON.parse(event['data'])
                     if(data.hasOwnProperty('enc')){
@@ -215,11 +253,34 @@
                         /*
                             Lets Decode 
                         */
+                        //console.log(data['CU'])
+                        //console.log(CryptoJS.AES.decrypt(data['CU'],enc).toString(CryptoJS.enc.Utf8))
                         var CU=JSON.parse(CryptoJS.AES.decrypt(data['CU'],enc).toString(CryptoJS.enc.Utf8))
-                        CU['createdAt']=moment(CU['createdAt']['$date'],'x').toString() || moment()
-                        CU['updatedAt']=moment(CU['updatedAt']['$date'],'x').toString() || moment()
+                        CU['createdAt']=moment(CU['createdAt']['$date'],'X').toString() || moment()
+                        CU['updatedAt']=moment(CU['updatedAt']['$date'],'X').toString() || moment()
                         navbarApp.set('CU',CU)
-                        console.log(CU)
+                        htmlBodyContentApp.set('CU',CU)
+                        if (CU['isAdmin']==true){
+                            /*
+                                We issue Request to Get all Admin list (adm)
+                                    Dealers (dlr)
+                                    Clients (clt)
+                                    Plans   (pln)
+                            */
+                            socketIO.send(CryptoJS.AES.encrypt(JSON.stringify({'id':'{{ theUser.id }}','target':'adm'}),enc))
+                            socketIO.send(CryptoJS.AES.encrypt(JSON.stringify({'id':'{{ theUser.id }}','target':'dlr'}),enc))
+                            socketIO.send(CryptoJS.AES.encrypt(JSON.stringify({'id':'{{ theUser.id }}','target':'clt'}),enc))
+                            socketIO.send(CryptoJS.AES.encrypt(JSON.stringify({'id':'{{ theUser.id }}','target':'pln'}),enc))
+                        }else if(CU['isDealer']==true){
+                            /*
+                                The Difference here is that we are targeted for only what belongs to this dealer
+                                No More 
+                            */
+                            socketIO.send(CryptoJS.AES.encrypt(JSON.stringify({'id':'{{ theUser.id }}','target':'clt'}),enc))
+                            socketIO.send(CryptoJS.AES.encrypt(JSON.stringify({'id':'{{ theUser.id }}','target':'pln'}),enc))
+                        }
+                        
+                        //console.log(CU)
                     }
                     if(data.hasOwnProperty('redirect')){
                         redirectTo=data['redirect']+"?verdict="+verdict
@@ -229,9 +290,21 @@
                     if(data.hasOwnProperty('UpdateCU')){
                         // 1- Check if verdict is true or false
                         if(data.hasOwnProperty('verdict')){
-                            var decryptedMsg=JSON.parse(CryptoJS.AES.decrypt(data['UpdateCU'],enc).toString(CryptoJS.enc.Utf8))
-                            console.log(decryptedMsg)
+                            if (data['verdict'] == false) {
+                                var decryptedMsg=JSON.parse(CryptoJS.AES.decrypt(data['UpdateCU'],enc).toString(CryptoJS.enc.Utf8))
+                                /*
+                                    Should indicate the Err Msg Needed Here 
+                                */
+                            }else {
+                                navbarApp.resetCU()
+                            }
+                            
                         }
+                    }
+                    if(data.hasOwnProperty('adm')){
+                        /*
+                        
+                        */
                     }
                 }
             });

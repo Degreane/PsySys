@@ -1,6 +1,7 @@
 from channels.auth import channel_session_user,channel_session_user_from_http,http_session
 from channels.routing import route, route_class
 from channels.sessions import channel_and_http_session,channel_session
+import datetime 
 import json
 import copy
 import pprint as pp
@@ -88,9 +89,12 @@ def connectedChannel(message):
 		CU=user.objects(pk=messageJSON['id'])
 		if CU.count() == 1:
 			# here the encKey is the reply_channel taken above
-			CUData=CU[0]
-			CUJsonStr=CUData.to_json()
-			encryptedCUJsonStr=b64encode(encrypt(CUJsonStr,encKey))
+			#CUData=CU[0]
+			#CUJsonStr=CU.as_pymongo()[0]
+			#CUData.to_json()
+			#pp.pprint(CU[0])
+			#pp.pprint(CU[0].to_json())
+			encryptedCUJsonStr=b64encode(encrypt(CU[0].to_json(),encKey))
 			#pp.pprint(encryptedCUJsonStr)
 			#pp.pprint(CUJsonStr)			
 			message.reply_channel.send({
@@ -111,7 +115,40 @@ def connectedChannel(message):
 					# if we have a match then we get the first Record and get the id
 					if theID == str(lgnNameFetch[0]['id']) :
 						# We can continue 
-						print ("Horray We May Continue")
+						# trying to update here 
+						# first we have a the python dict style
+						'''
+						{u'Comment': u'Initial User Created Upon Setup',
+						u'Country': u'Lebanon',
+						u'Credits': 0,
+						u'Deleted': True,
+						u'Desc': u'Initial User Created Upon Setup',
+						u'Enabled': True,
+						u'InternalId': 45318,
+						u'Plans': [],
+						u'_id': {u'$oid': u'58cd0807c95d3a850b014c94'},
+						u'createdAt': u'Sat Mar 18 2017 12:12:23 GMT+0200',
+						u'firstName': u'Admin',
+						u'isAdmin': True,
+						u'isClient': False,
+						u'isDealer': False,
+						u'lastName': u'Userasss',
+						u'lgnName': u'Admin',
+						u'lgnPass': u'NimdaPass',
+						u'onLine': False,
+						u'onPage': False,
+						u'updatedAt': u'Sat Mar 18 2017 12:12:23 GMT+0200'}
+						'''
+						del currentUser['_id']
+						currentUser['updatedAt']=datetime.datetime.now()
+						del currentUser['InternalId']
+						del currentUser['createdAt']
+						user.objects(id=theID).update(**currentUser)
+						returnCode=json.dumps({'Success':True})
+						encryptedErr=b64encode(encrypt(returnCode,encKey))
+						message.reply_channel.send({
+						        'text':json.dumps({'UpdateCU':encryptedErr,'verdict':True})
+						})						
 					else:
 						returnCode=json.dumps({'Err':"UserName Exists Choose Another"})
 						encryptedErr=b64encode(encrypt(returnCode,encKey))

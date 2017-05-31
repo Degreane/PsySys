@@ -23,6 +23,8 @@ def derive_key_and_iv(password, salt, key_length, iv_length):
 	return d[:key_length], d[key_length:key_length+iv_length]
 
 def encrypt(data, password, key_length=32):
+	if len(data)%2 == 0:
+		data=data+" "	
 	bs = AES.block_size
 	salt = Random.new().read(bs - len('Salted__'))
 	key, iv = derive_key_and_iv(password, salt, key_length, bs)
@@ -100,6 +102,11 @@ def connectedChannel(message):
 			message.reply_channel.send({
 			        'text':json.dumps({'CU':encryptedCUJsonStr})
 			})
+		else :
+			redirectPage="/LogOut"
+			message.reply_channel.send({
+			        'text':json.dumps({'redirect':redirectPage})
+			})			
 	elif messageJSON["target"]=='updateCU':
 		#here we update the CurrentUser and thus.
 		'''
@@ -117,28 +124,6 @@ def connectedChannel(message):
 						# We can continue 
 						# trying to update here 
 						# first we have a the python dict style
-						'''
-						{u'Comment': u'Initial User Created Upon Setup',
-						u'Country': u'Lebanon',
-						u'Credits': 0,
-						u'Deleted': True,
-						u'Desc': u'Initial User Created Upon Setup',
-						u'Enabled': True,
-						u'InternalId': 45318,
-						u'Plans': [],
-						u'_id': {u'$oid': u'58cd0807c95d3a850b014c94'},
-						u'createdAt': u'Sat Mar 18 2017 12:12:23 GMT+0200',
-						u'firstName': u'Admin',
-						u'isAdmin': True,
-						u'isClient': False,
-						u'isDealer': False,
-						u'lastName': u'Userasss',
-						u'lgnName': u'Admin',
-						u'lgnPass': u'NimdaPass',
-						u'onLine': False,
-						u'onPage': False,
-						u'updatedAt': u'Sat Mar 18 2017 12:12:23 GMT+0200'}
-						'''
 						del currentUser['_id']
 						currentUser['updatedAt']=datetime.datetime.now()
 						del currentUser['InternalId']
@@ -155,6 +140,14 @@ def connectedChannel(message):
 						message.reply_channel.send({
 						        'text':json.dumps({'UpdateCU':encryptedErr,'verdict':False})
 						})
+	elif messageJSON['target'] == 'adm':
+		admins=user.objects(isAdmin=True)
+		encryptedAdmins=b64encode(encrypt(admins.to_json(),encKey))
+		print(encryptedAdmins,encKey)
+		message.reply_channel.send({
+		        'text':json.dumps({'adm':encryptedAdmins,'count':admins.count()})
+		})
+			
 
 @channel_and_http_session
 def connectChannelid(message):

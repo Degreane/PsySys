@@ -6,7 +6,7 @@
 
 {% endblock %}
 {% block navbar_brand %} <span id="NavBarBrand">  </span> {% endblock %}
-{% block lgnInlgnOut %} <li><a href="/LogOut" id="lgnOut" class="logo" >LogOut</a></li> {% endblock %}
+{% block lgnInlgnOut %} <li><a href="/LogOut" id="lgnOut" class="logo" >LogOut <i class="fa fa-sign-out" aria-hidden="true"></i></a></li> {% endblock %}
 {% block content_html %} 
     <span id="HtmlBodyContent"></span>
 {% endblock %}
@@ -25,10 +25,10 @@
                 </div>
                 <div class="panel-body collapse in" id="AdminIntroPanel">
                         <div class="input-group input-group-sm"><span class="input-group-addon"><i class="fa fa-binoculars"></i></span><input type="text" class="form-control text-center pull-right" placeholder="Quick Search ..."></div><br>
-                        <div><a href="#" class="btnMe">Total &nbsp;&nbsp;<span class="badge badge-notify-green"><%= adm.count %></span></a></div>
-                        <div><a href="#" class="btnMe"> Enabled &nbsp;&nbsp;<span class="badge badge-notify-green"><%= adm.count %></span></a></div>
-                        <div><a href="#" class="btnMe"> Disabled/Deleted &nbsp;&nbsp;<span class="badge badge-notify-green"><%= adm.count %></span></a></div>
-                        <div><a href="#" class="btnMe"> Add New <i class="fa fa-cog"></i></a></div>
+                        <div><a href="#" class="btnMe" on-click="@this.ViewAdmins('T'),false">Total &nbsp;&nbsp;<span class="badge badge-notify-green"><%= adm.Tcount %></span></a></div>
+                        <div><a href="#" class="btnMe" on-click="@this.ViewAdmins('E'),false"> Enabled &nbsp;&nbsp;<span class="badge badge-notify-green"><%= adm.Ecount %></span></a></div>
+                        <div><a href="#" class="btnMe" on-click="@this.ViewAdmins('D'),false"> Disabled/Deleted &nbsp;&nbsp;<span class="badge badge-notify-red"><%= adm.Dcount %></span></a></div>
+                        <div><a href="#" class="btnMe" on-click="@this.NewAdmin(),false"> Add New <i class="fa fa-cog"></i></a></div>
                 </div>
             </div>
         </div>
@@ -236,9 +236,20 @@
                         CU:{},
                         adm:{
                             list:[],
-                            count:0
+                            Tcount:0,
+                            Ecount:0,
+                            Dcount:0
                         }
+                    },
+                    ViewAdmins:function(W){
+                        console.log('Viewing ',W)
                     }
+                })
+                htmlBodyContentApp.observe('adm.list',function(newC,oldC,keyC){
+                    htmlBodyContentApp.set('adm.Tcount',newC.length)
+                    var Admins=TAFFY(newC)
+                    htmlBodyContentApp.set('adm.Ecount',Admins({'Enabled':true,'Deleted':false}).count())
+                    htmlBodyContentApp.set('adm.Dcount',Admins([{'Enabled':false},{'Deleted':true}]).count())
                 })
                 socketIO.onmessage=function(event){
                     var data =JSON.parse(event['data'])
@@ -283,8 +294,14 @@
                         //console.log(CU)
                     }
                     if(data.hasOwnProperty('redirect')){
-                        redirectTo=data['redirect']+"?verdict="+verdict
-                        console.log("redirecting to ",data['redirect']+"?verdict="+verdict)
+                        var redirectTo=''
+                        if(data.hasOwnProperty('verdict')){
+                            redirectTo=data['redirect']+"?verdict="+verdict
+                        }else{
+                            redirectTo=data['redirect']
+                        }
+                        //redirectTo=data['redirect']+"?verdict="+verdict
+                        //console.log("redirecting to ",data['redirect']+"?verdict="+verdict)
                         window.location=redirectTo
                     }
                     if(data.hasOwnProperty('UpdateCU')){
@@ -303,8 +320,11 @@
                     }
                     if(data.hasOwnProperty('adm')){
                         /*
-                        
+                         Here We Get The Admins/ and The count
                         */
+                        var decryptedJSON=CryptoJS.AES.decrypt(data['adm'],enc).toString(CryptoJS.enc.Utf8)
+                        var decryptedMsg=JSON.parse(decryptedJSON)
+                        htmlBodyContentApp.animate('adm.list',decryptedMsg)
                     }
                 }
             });

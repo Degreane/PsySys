@@ -16,7 +16,7 @@
     <div class="container-fluid">
         <div class="row">
     <%= #if CU.isAdmin %>
-        <div class="col-sm-3">
+        <div class="col-md-3">
             <div class="panel panel-primary">
                 <div class="panel-heading text-center">
                     <a class="panel-title  logo" href="#AdminIntroPanel" aria-controls="AdminIntroPanel" data-toggle="collapse">
@@ -24,17 +24,139 @@
                     </a>
                 </div>
                 <div class="panel-body collapse in" id="AdminIntroPanel">
-                        <div class="input-group input-group-sm"><span class="input-group-addon"><i class="fa fa-binoculars"></i></span><input type="text" class="form-control text-center pull-right" placeholder="Quick Search ..."></div><br>
+                        <div class="input-group input-group-md"><span class="input-group-addon"><i class="fa fa-binoculars"></i></span><input type="text" class="form-control text-center pull-right" placeholder="Quick Search ..."></div><br>
                         <div><a href="#" class="btnMe" on-click="@this.ViewAdmins('T'),false">Total &nbsp;&nbsp;<span class="badge badge-notify-green"><%= adm.Tcount %></span></a></div>
                         <div><a href="#" class="btnMe" on-click="@this.ViewAdmins('E'),false"> Enabled &nbsp;&nbsp;<span class="badge badge-notify-green"><%= adm.Ecount %></span></a></div>
                         <div><a href="#" class="btnMe" on-click="@this.ViewAdmins('D'),false"> Disabled/Deleted &nbsp;&nbsp;<span class="badge badge-notify-red"><%= adm.Dcount %></span></a></div>
-                        <div><a href="#" class="btnMe" on-click="@this.NewAdmin(),false"> Add New <i class="fa fa-cog"></i></a></div>
+                        <div><a href="#" class="btnMe" on-click="@this.NewAdmin('Open'),false"> Add New <i class="fa fa-cog"></i></a></div>
                 </div>
             </div>
         </div>
     <%= /if %>
         </div>
     </div>
+    <%= #if newA.enabled %>
+        <div class="modal fade in" tabindex="-1" role="dialog" data-show="true" style="display:block;background-color:rgba(0,0,0,0.8);opacity:1;overflow:auto;">
+            <div class="modal-dialog" role="document" style="width:70%;">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" on-click="@this.CloseNew(),false"><i class="fa fa-times-circle" aria-hidden="true"></i></button>
+                        <h4 class="modal-title text-center logo ">New Admin (<%= newA.profile.firstName %> <%= newA.profile.lastName %>)</h4>
+                    </div>
+                    <div class="modal-body text-center">
+                        <div class="container-fluid">
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="panel panel-primary">
+                                        <div class="panel-body">
+                                            <form class="form-horizontal">
+                                                <div class="form-group">
+                                                    <label for="firstName" class="col-md-2 control-label">First Name :</label>
+                                                    <div class="col-md-4">
+                                                        <input type="text" placeholder="First Name :" class="form-control text-center" id="firstName" value="<%= newA.profile.firstName %>">
+                                                    </div>
+                                                    <label for="lastName" class="col-md-2 control-label">Last Name :</label>
+                                                    <div class="col-md-4">
+                                                        <input type="text" placeholder="Last Name :" class="form-control text-center" id="lastName" value="<%= newA.profile.lastName %>">
+                                                    </div>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="lgnName" class="col-md-2 control-label">UserName :</label>
+                                                    <div class="col-md-4">
+                                                        <input type="text" placeholder="User Name :" class="form-control text-center" id="lgnName" value="<%= newA.profile.lgnName %>">
+                                                    </div>
+                                                    <label for="lgnPass" class="col-md-2 control-label">PassWord :</label>
+                                                    <div class="col-md-4">
+                                                        <input type="password" placeholder="PassWord :" class="form-control text-center" id="lgnPass" value="<%= newA.profile.lgnPass %>">
+                                                    </div>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="Desc" class="col-md-2 control-label"> Description :</label>
+                                                    <div class="col-md-10">
+                                                        <textarea type="text" placeholder="Description : " class="form-control text-center" id="Desc" ><%= newA.profile.Desc %></textarea>
+                                                    </div>
+                                                </div>
+                                                    <div class="form-group">
+                                                    <label for="Comment" class="col-md-2 control-label"> Comment :</label>
+                                                    <div class="col-md-10">
+                                                        <textarea type="text" placeholder="Comment : " class="form-control text-center" id="Comment" ><%= newA.profile.Comment %></textarea>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div class="form-group">
+                                                    <label for="createdAt" class="col-md-2 control-label"> Created At :</label>
+                                                    <div class="col-md-4">
+                                                        <input type="text" placeholder="Created At : " class="form-control text-center" id="createdAt" disabled value="<%= newA.profile.createdAt %>">
+                                                    </div>
+                                                    <label for="updatedAt" class="col-md-2 control-label"> Updated At :</label>
+                                                    <div class="col-md-4">
+                                                        <input type="text" placeholder="Updated At : " class="form-control text-center" id="updatedAt" disabled value="<%= newA.profile.updatedAt %>">
+                                                    </div>
+                                                </div>
+                                                 <div class="form-group">
+                                                    <label for="Country" class="col-md-2 control-label"> Country :</label>
+                                                    <div class="col-md-4">
+                                                        <input type="text" placeholder="Country : " class="form-control text-center" id="Country" value="<%= newA.profile.Country %>">
+                                                    </div>
+                                                    <label for="City" class="col-md-2 control-label"> City :</label>
+                                                    <div class="col-md-4">
+                                                        <input type="text" placeholder="City : " class="form-control text-center" id="City" value="<%= newA.profile.City %>">
+                                                    </div>
+                                                </div>
+                                                 <div class="form-group">
+                                                    <label for="Street" class="col-md-2 control-label"> Street :</label>
+                                                    <div class="col-md-4">
+                                                        <input type="text" placeholder="Street : " class="form-control text-center" id="Street" value="<%= newA.profile.Street %>">
+                                                    </div>
+                                                    <label for="Building" class="col-md-2 control-label"> Building :</label>
+                                                    <div class="col-md-4">
+                                                        <input type="text" placeholder="Building : " class="form-control text-center" id="Building" value="<%= newA.profile.Building %>">
+                                                    </div>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="Floor" class="col-md-2 control-label"> Floor :</label>
+                                                    <div class="col-md-4">
+                                                        <input type="text" placeholder="Floor : " class="form-control text-center" id="Floor" value="<%= newA.profile.Floor %>">
+                                                    </div>
+                                                    <label for="internalID" class="col-md-2 control-label"> InternalID :</label>
+                                                    <div class="col-md-4">
+                                                        <input type="text" placeholder="InternalID : " class="form-control text-center" id="internalID" disabled value="<%= newA.profile.InternalId %>">
+                                                    </div>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="EMail" class="col-md-2 control-label"> E-Mail :</label>
+                                                    <div class="col-md-4">
+                                                        <input type="text" placeholder="E-Mail : " class="form-control text-center" id="EMail" value="<%= newA.profile.Email %>">
+                                                    </div>
+                                                    <label for="Phone" class="col-md-2 control-label"> Phone :</label>
+                                                    <div class="col-md-4">
+                                                        <input type="text" placeholder="Phone Number : " class="form-control text-center" id="Phone" value="<%= newA.profile.Phone %>">
+                                                    </div>
+                                                </div>
+                                                <div class="form-group">
+                                                    <div class="col-md-10 col-md-offset-1">
+                                                        <button class="btn btn-primary btn-xs boxMe" on-click="@this.NewAdmin('Insert'),false">Insert</button>
+                                                        <button class="btn btn-default btn-xs boxMe" on-click="@this.NewAdmin('Reset'),false">Reset</button>
+                                                    </div>
+                                                </div>
+                                                <%= #if newA.Err %>
+                                                    <div class="col-md-12">
+                                                        <div class="alert alert-danger" role="danger">
+                                                            <%% newA.Err %%>
+                                                        </div>
+                                                    </div>
+                                                <%= /if %>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    <%= /if %>
 </script>
 <script id="NavBarBrandTpl" type="text/ractive-x">
     <a class="navbar-brand logo" href="#" on-click="@this.ViewCU(),false">
@@ -52,13 +174,13 @@
                     <div class="modal-body text-center">
                       <div class="container-fluid">
                         <div class="row">
-                            <div class="col-sm-12">
+                            <div class="col-md-12">
                                 <div class="panel panel-primary">
                                     <div class="panel-body">
                                         <form class="form-horizontal">
                                             <div class="form-group ">
-                                                <label for="lgnName" class="col-sm-2 control-label"> UserName :</label>
-                                                <div class="col-sm-4">
+                                                <label for="lgnName" class="col-md-2 control-label"> UserName :</label>
+                                                <div class="col-md-4">
                                                     <input type="text" placeholder="UserName : " class="form-control text-center" id="lgnName" value="<%= CU.lgnName %>">
                                                     <%= #if lgnNameErr %>
                                                         <div class="textMe-Error boxed text-center">
@@ -66,8 +188,8 @@
                                                         </div>
                                                     <%= /if %>
                                                 </div>
-                                                <label for="lgnPass" class="col-sm-2 control-label"> PassWord :</label>
-                                                <div class="col-sm-4">
+                                                <label for="lgnPass" class="col-md-2 control-label"> PassWord :</label>
+                                                <div class="col-md-4">
                                                     <input type="password" placeholder="PassWord : " class="form-control text-center" id="lgnPass" value="<%= CU.lgnPass %>">
                                                     <%= #if lgnPassErr %>
                                                         <div class="textMe-Error boxed text-center">
@@ -77,91 +199,91 @@
                                                 </div>
                                             </div>
                                             <div class="form-group">
-                                                <label for="firstName" class="col-sm-2 control-label"> First Name :</label>
-                                                <div class="col-sm-4">
+                                                <label for="firstName" class="col-md-2 control-label"> First Name :</label>
+                                                <div class="col-md-4">
                                                     <input type="text" placeholder="FirstName : " class="form-control text-center" id="firstName" value="<%= CU.firstName %>">
                                                 </div>
-                                                <label for="lastName" class="col-sm-2 control-label"> Last Name :</label>
-                                                <div class="col-sm-4">
+                                                <label for="lastName" class="col-md-2 control-label"> Last Name :</label>
+                                                <div class="col-md-4">
                                                     <input type="text" placeholder="Last Name : " class="form-control text-center" id="lastName" value="<%= CU.lastName %>">
                                                 </div>
                                             </div>
                                             <div class="form-group">
-                                                <label for="Desc" class="col-sm-2 control-label"> Description :</label>
-                                                <div class="col-sm-10">
+                                                <label for="Desc" class="col-md-2 control-label"> Description :</label>
+                                                <div class="col-md-10">
                                                     <textarea type="text" placeholder="Description : " class="form-control text-center" id="Desc" ><%= CU.Desc %></textarea>
                                                 </div>
                                             </div>
                                             <%= #if CU.isAdmin %>
                                                 <div class="form-group">
-                                                <label for="Comment" class="col-sm-2 control-label"> Comment :</label>
-                                                <div class="col-sm-10">
+                                                <label for="Comment" class="col-md-2 control-label"> Comment :</label>
+                                                <div class="col-md-10">
                                                     <textarea type="text" placeholder="Comment : " class="form-control text-center" id="Comment" ><%= CU.Comment %></textarea>
                                                 </div>
                                             </div>
                                             <%= /if %>
                                             <div class="form-group">
-                                                <label for="createdAt" class="col-sm-2 control-label"> Created At :</label>
-                                                <div class="col-sm-4">
+                                                <label for="createdAt" class="col-md-2 control-label"> Created At :</label>
+                                                <div class="col-md-4">
                                                     <input type="text" placeholder="Created At : " class="form-control text-center" id="createdAt" disabled value="<%= CU.createdAt %>">
                                                 </div>
-                                                <label for="updatedAt" class="col-sm-2 control-label"> Updated At :</label>
-                                                <div class="col-sm-4">
+                                                <label for="updatedAt" class="col-md-2 control-label"> Updated At :</label>
+                                                <div class="col-md-4">
                                                     <input type="text" placeholder="Updated At : " class="form-control text-center" id="updatedAt" disabled value="<%= CU.updatedAt %>">
                                                 </div>
                                             </div>
                                              <div class="form-group">
-                                                <label for="Country" class="col-sm-2 control-label"> Country :</label>
-                                                <div class="col-sm-4">
+                                                <label for="Country" class="col-md-2 control-label"> Country :</label>
+                                                <div class="col-md-4">
                                                     <input type="text" placeholder="Country : " class="form-control text-center" id="Country" value="<%= CU.Country %>">
                                                 </div>
-                                                <label for="City" class="col-sm-2 control-label"> City :</label>
-                                                <div class="col-sm-4">
+                                                <label for="City" class="col-md-2 control-label"> City :</label>
+                                                <div class="col-md-4">
                                                     <input type="text" placeholder="City : " class="form-control text-center" id="City" value="<%= CU.City %>">
                                                 </div>
                                             </div>
                                              <div class="form-group">
-                                                <label for="Street" class="col-sm-2 control-label"> Street :</label>
-                                                <div class="col-sm-4">
+                                                <label for="Street" class="col-md-2 control-label"> Street :</label>
+                                                <div class="col-md-4">
                                                     <input type="text" placeholder="Street : " class="form-control text-center" id="Street" value="<%= CU.Street %>">
                                                 </div>
-                                                <label for="Building" class="col-sm-2 control-label"> Building :</label>
-                                                <div class="col-sm-4">
+                                                <label for="Building" class="col-md-2 control-label"> Building :</label>
+                                                <div class="col-md-4">
                                                     <input type="text" placeholder="Building : " class="form-control text-center" id="Building" value="<%= CU.Building %>">
                                                 </div>
                                             </div>
                                             <div class="form-group">
-                                                <label for="Floor" class="col-sm-2 control-label"> Floor :</label>
-                                                <div class="col-sm-4">
+                                                <label for="Floor" class="col-md-2 control-label"> Floor :</label>
+                                                <div class="col-md-4">
                                                     <input type="text" placeholder="Floor : " class="form-control text-center" id="Floor" value="<%= CU.Floor %>">
                                                 </div>
-                                                <label for="internalID" class="col-sm-2 control-label"> InternalID :</label>
-                                                <div class="col-sm-4">
+                                                <label for="internalID" class="col-md-2 control-label"> InternalID :</label>
+                                                <div class="col-md-4">
                                                     <input type="text" placeholder="InternalID : " class="form-control text-center" id="internalID" disabled value="<%= CU.InternalId %>">
                                                 </div>
                                             </div>
                                             <div class="form-group">
-                                                <label for="EMail" class="col-sm-2 control-label"> E-Mail :</label>
-                                                <div class="col-sm-4">
+                                                <label for="EMail" class="col-md-2 control-label"> E-Mail :</label>
+                                                <div class="col-md-4">
                                                     <input type="text" placeholder="E-Mail : " class="form-control text-center" id="EMail" value="<%= CU.Email %>">
                                                 </div>
-                                                <label for="Phone" class="col-sm-2 control-label"> Phone :</label>
-                                                <div class="col-sm-4">
+                                                <label for="Phone" class="col-md-2 control-label"> Phone :</label>
+                                                <div class="col-md-4">
                                                     <input type="text" placeholder="Phone Number : " class="form-control text-center" id="Phone" value="<%= CU.Phone %>">
                                                 </div>
                                             </div>
                                             
                                             <div class="form-group">
-                                                <label for="Enabled" class="col-sm-2 control-label"> Enabled :</label>
-                                                <div class="col-sm-4">
+                                                <label for="Enabled" class="col-md-2 control-label"> Enabled :</label>
+                                                <div class="col-md-4">
                                                     <%= #if CU.Enabled %>
                                                         <button class="btn btn-success btn-xs boxMe" on-click="@this.toggleEnabled(),false">Enabled</button>
                                                     <%= else %>
                                                         <button class="btn btn-danger btn-xs boxMe" on-click="@this.toggleEnabled(),false">Disabled</button>
                                                     <%= /if %>
                                                 </div>
-                                                <label for="Deleted" class="col-sm-2 control-label"> Deleted :</label>
-                                                <div class="col-sm-4">
+                                                <label for="Deleted" class="col-md-2 control-label"> Deleted :</label>
+                                                <div class="col-md-4">
                                                     <%= #if CU.Deleted %>
                                                         <button class="btn btn-danger btn-xs boxMe" on-click="@this.toggleDeleted(),false">True</button>
                                                     <%= else %>
@@ -170,7 +292,7 @@
                                                 </div>
                                             </div>
                                             <div class="form-group">
-                                                <div class="col-sm-10 col-sm-offset-1">
+                                                <div class="col-md-10 col-md-offset-1">
                                                     <button class="btn btn-primary btn-xs boxMe" on-click="@this.updateCU(),false">Update</button>
                                                     <button class="btn btn-default btn-xs boxMe" on-click="@this.resetCU(),false">Reset</button>
                                                 </div>
@@ -205,6 +327,7 @@
                     theUser=JSON.parse($('<div/>').html(theUser).text())*/
                 var navbarApp= new Ractive({
                     delimiters:['<%=','%>'],
+                    tripleDelimiters:['<%%','%%>'],
                     template:"#NavBarBrandTpl",
                     el:'#NavBarBrand',
                     data: {
@@ -230,6 +353,7 @@
                 })
                 var htmlBodyContentApp = new Ractive({
                     delimiters:['<%=','%>'],
+                    tripleDelimiters:['<%%','%%>'],
                     template:'#HtmlBodyContentTpl',
                     el:'#HtmlBodyContent',
                     data: {
@@ -239,10 +363,102 @@
                             Tcount:0,
                             Ecount:0,
                             Dcount:0
+                        },
+                        newA:{
+                            enabled:false,
+                            profile:{
+                                firstName:'',
+                                lastName:'',
+                                lgnName: genUID(),
+                                lgnPass: genUID(),
+                                Desc:'',
+                                Comment:'',
+                                createdAt:moment().toString(),
+                                updatedAt:moment().toString(),
+                                Country:'Lebanon',
+                                City:'',
+                                Street:'',
+                                Buidling:'',
+                                Floor:'',
+                                InternalId:'',
+                                Email:'',
+                                Phone:'',
+                                Enabled:true,
+                                Deleted:false
+                            },
                         }
                     },
                     ViewAdmins:function(W){
                         console.log('Viewing ',W)
+                    },NewAdmin:function(W){
+                        /*
+                            New Admin 
+                        */
+                        if(W=='Open'){
+                            this.set('newA.enabled',true)
+                            socketIO.send(CryptoJS.AES.encrypt(JSON.stringify({'newA':'InternalId','target':'adm'}),enc))
+                        }else if(W=='Reset') {
+                            var reset={
+                                firstName:'',
+                                lastName:'',
+                                lgnName: genUID(),
+                                lgnPass: genUID(),
+                                Desc:'',
+                                Comment:'',
+                                createdAt:moment().toString(),
+                                updatedAt:moment().toString(),
+                                Country:'Lebanon',
+                                City:'',
+                                Street:'',
+                                Buidling:'',
+                                Floor:'',
+                                InternalId:'',
+                                Email:'',
+                                Phone:'',
+                                Enabled:true,
+                                Deleted:false,
+                                Credits:0,
+                                isClient:false,
+                                isDealer:false,
+                                isAdmin:true
+                            }
+                            this.set('newA.profile',reset)
+                            socketIO.send(CryptoJS.AES.encrypt(JSON.stringify({'newA':'InternalId','target':'adm'}),enc))
+                        }else if(W=='Insert') {
+                            /* Here is the tricky part
+                                first we should declare our encryption
+                                then we collect our data 
+                                send the encrypted data back to the server and wait for response target.
+                            */
+                            this.set('newA.Err',false)
+                            var Err=false;
+                            var newAdmin=this.get('newA.profile')
+                            if (newAdmin['firstName'].trim().length == 0){
+                                Err='At Least <a href="#firstName">First Name</a> should be set'
+                            }
+                            if(newAdmin['lgnName'].trim().length == 0 ){
+                                if(Err == false){
+                                    Err='<a href="#lgnName">UserName</a> should be set'
+                                }else{
+                                    Err=Err+'<br>'+'<a href="#lgnName">UserName</a> should be set'
+                                }
+                            }
+                            if(newAdmin['lgnPass'].trim().length == 0 ){
+                                if(Err == false){
+                                    Err='<a href="#lgnPass">PassWord</a> should be set'
+                                }else{
+                                    Err=Err+'<br>'+'<a href="#lgnPass">PassWord</a> should be set'
+                                }
+                            }
+                            if (Err == false) {
+                                socketIO.send(CryptoJS.AES.encrypt(JSON.stringify({'newA':'Insert','target':'adm','profile':newAdmin})))
+                            }else {
+                                this.set('newA.Err',Err)
+                            }
+                            
+                        }
+                    },CloseNew:function(){
+                        this.set('newA.enabled',false)
                     }
                 })
                 htmlBodyContentApp.observe('adm.list',function(newC,oldC,keyC){
@@ -296,7 +512,7 @@
                     if(data.hasOwnProperty('redirect')){
                         var redirectTo=''
                         if(data.hasOwnProperty('verdict')){
-                            redirectTo=data['redirect']+"?verdict="+verdict
+                            redirectTo=data['redirect']+"?verdict="+data['verdict']
                         }else{
                             redirectTo=data['redirect']
                         }
@@ -325,6 +541,22 @@
                         var decryptedJSON=CryptoJS.AES.decrypt(data['adm'],enc).toString(CryptoJS.enc.Utf8)
                         var decryptedMsg=JSON.parse(decryptedJSON)
                         htmlBodyContentApp.animate('adm.list',decryptedMsg)
+                    }
+                    if(data.hasOwnProperty('newA')){
+                        if (data['newA']== 'InternalId'){
+                            /*
+                                Here we get the internal ID msg
+                            */
+                            var decryptedJSON=CryptoJS.AES.decrypt(data['verdict'],enc).toString(CryptoJS.enc.Utf8)
+                            htmlBodyContentApp.animate('newA.profile.InternalId',decryptedJSON)
+                        }
+                        if(data['newA'] == 'Insert'){
+                            /*
+                                Inserting Admin should check for presense of verdict 
+                                01/06/2017
+                            */
+                        
+                        }
                     }
                 }
             });

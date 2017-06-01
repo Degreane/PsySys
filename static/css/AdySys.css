@@ -401,7 +401,7 @@ table > thead > tr > td.danger,
 .bg-danger {
     background-color: #e14d57
 }
-.alert-danger {
+.alert-dangerRed {
     color: #ebccd1;
     background-color: #e14d57;
     border-color: #ebccd1;

@@ -18,6 +18,19 @@
         <script type="text/javascript">
             var socketIO = new ReconnectingWebSocket('ws://' + window.location.host+'/id/')
             var enc=null
+            var genUID = function(){
+                var sGuid="";for(i=0;i<16;i++){
+                        sGuid += Math.floor(Math.random()*0xF).toString(0xF)
+                }
+                return sGuid
+            }
+            setInterval(function(){
+                if (enc !== null){
+                    socketIO.send(CryptoJS.AES.encrypt(JSON.stringify({"CHKCONN":moment().toString(),"target":'CHK'}),enc))
+                }else {
+                    window.location='/'
+                }
+            },60000)
         </script>
         {% block header_script %}{% endblock %}
     </head>

@@ -12,6 +12,7 @@ from Crypto.Hash import MD5
 from hashlib import md5
 from Crypto import Random
 from Crypto.Cipher import AES
+from random import choice
 from base64 import b64encode,b64decode
 from models import user
 
@@ -53,12 +54,12 @@ def decrypt(data,  password, key_length=32):
 @channel_and_http_session
 def connectedChannel(message):
 	# We get this in here when we connect from a socket for login 
-	print("Message Connected decrypting in Clients")
+	#print("Message Connected decrypting in Clients")
 	encKey=MD5.new(str(message.reply_channel)).hexdigest()
 	decryptedJSON=decrypt(b64decode(message['text']),encKey)
-	print("\tEncKey is {}\n\tMessage is {}\n\tDecryptJson is {}\n".format(encKey,message['text'],decryptedJSON))
+	#print("\tEncKey is {}\n\tMessage is {}\n\tDecryptJson is {}\n".format(encKey,message['text'],decryptedJSON))
 	messageJSON=json.loads(decryptedJSON)
-	print type(message.http_session)
+	#print type(message.http_session)
 	if message.http_session is None:
 		print("Session type None")
 		redirectPage="/"
@@ -66,7 +67,16 @@ def connectedChannel(message):
 		encryptedRedirectParam=b64encode(encrypt(redirectParam,encKey))
 		message.reply_channel.send({
 		        'text':json.dumps({'verdict':encryptedRedirectParam,'redirect':redirectPage})
-		})		
+		})
+	if messageJSON["target"] == 'CHK':
+		if message.http_session is None:
+			print("Session type None")
+			redirectPage="/"
+			redirectParam="InvalidSession=true"
+			encryptedRedirectParam=b64encode(encrypt(redirectParam,encKey))
+			message.reply_channel.send({
+					'text':json.dumps({'verdict':encryptedRedirectParam,'redirect':redirectPage})
+				})
 	if messageJSON["target"] == 'login' and message.http_session.has_key('t'):
 		Client = user.objects(lgnName=messageJSON['lgnName'],lgnPass=messageJSON['lgnPass'] )
 		if Client.count() == 1:
@@ -141,12 +151,34 @@ def connectedChannel(message):
 						        'text':json.dumps({'UpdateCU':encryptedErr,'verdict':False})
 						})
 	elif messageJSON['target'] == 'adm':
-		admins=user.objects(isAdmin=True)
-		encryptedAdmins=b64encode(encrypt(admins.to_json(),encKey))
-		print(encryptedAdmins,encKey)
-		message.reply_channel.send({
-		        'text':json.dumps({'adm':encryptedAdmins,'count':admins.count()})
-		})
+		if messageJSON.has_key('newA'):
+			# if we have Request for InternalId for Admin then we should reply with a random Integer of a range between 1000 and 5000
+			# check this integer against the database
+			# if it is unique we reply with it.
+			# if not then we request another Integer and reply with it.
+			if messageJSON['newA']=='InternalId':
+				def genRandom():
+					myRand=0
+					while myRand <1000 or myRand >5000:
+						myRand=int(''.join([choice('0123456789') for i in range(5)]))
+					return myRand
+				myRand=genRandom()
+				encryptedMSG=b64encode(encrypt(str(myRand),encKey))
+				message.reply_channel.send({
+				        'text':json.dumps({'newA':'InternalId','verdict':encryptedMSG})
+				})
+			# here we should check for value of [newA]=='Insert'
+			# we should send as well ({newA:Insert,verdict:verdict,MSG:msg})
+			# where verdict should contain one of (Err,Success)
+			# and msg is the msg to represent back on the browser /Client 
+			# 01/06/2017
+		else:
+			admins=user.objects(isAdmin=True)
+			encryptedAdmins=b64encode(encrypt(admins.to_json(),encKey))
+			#print(encryptedAdmins,encKey)
+			message.reply_channel.send({
+				'text':json.dumps({'adm':encryptedAdmins,'count':admins.count()})
+			})
 			
 
 @channel_and_http_session

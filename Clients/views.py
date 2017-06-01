@@ -20,7 +20,7 @@ import tempfile as tf
 
 # Create your views here.
 def index(request):
-    request.session.set_expiry(600)
+    request.session.set_expiry(30)
     #return HttpResponse("SomeThing requested {} to be sent back ".format(request))
     print("############ R! ###############")
     reqSessionID=request.session.session_key
@@ -67,6 +67,7 @@ def index(request):
                     request.session['LoggedIn']=True
                     request.session['theUserID']=str(theUserDetailed.id)
                     request.session.save()
+                    # We should Take Note also to use the Value in here within to declare page generation (01/06/2017)
                     return render(request,'index.html',{'theUser':theUserDetailed})
             except Exception,e:
                 pp.pprint(e)

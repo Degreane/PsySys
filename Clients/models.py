@@ -22,7 +22,7 @@ class user(mg.Document):
     lgnPass=mg.StringField()
     onPage=mg.BooleanField()
     lgnName=mg.StringField()
-    createdAt=mg.StringField()
+    createdAt=mg.DateTimeField()
     Desc=mg.StringField()
     onLine=mg.BooleanField()
     Building=mg.StringField()

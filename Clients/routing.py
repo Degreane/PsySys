@@ -167,11 +167,45 @@ def connectedChannel(message):
 				message.reply_channel.send({
 				        'text':json.dumps({'newA':'InternalId','verdict':encryptedMSG})
 				})
+			elif messageJSON['newA']=='Insert':
 			# here we should check for value of [newA]=='Insert'
 			# we should send as well ({newA:Insert,verdict:verdict,MSG:msg})
 			# where verdict should contain one of (Err,Success)
 			# and msg is the msg to represent back on the browser /Client 
 			# 01/06/2017
+				#pp.pprint(messageJSON)
+				if user.objects(lgnName=messageJSON['profile']['lgnName']).count() >0:
+					returnCode=json.dumps({'Err':'<a href="#lgnName">UserName</a> Exists, Use Another'})
+					encryptedErr=b64encode(encrypt(returnCode,encKey))
+					message.reply_channel.send({
+					        'text':json.dumps({'newA':'Insert','verdict':False,'MSG':encryptedErr})
+					})
+				else:
+					print str(messageJSON['profile'])
+					try :
+						theUser = user()
+						messageJSON['profile']['createdAt']=datetime.datetime.now()
+						messageJSON['profile']['updatedAt']=datetime.datetime.now()
+						messageJSON['profile']['isAdmin']=True
+						messageJSON['profile']['isClient']=False
+						messageJSON['profile']['isDealer']=False
+						messageJSON['profile']['Enabled']=True
+						messageJSON['profile']['Deleted']=False
+						for item in messageJSON['profile'].keys():
+							theUser[item]=messageJSON['profile'][item]
+						theUser.save()
+						returnCode=json.dumps({'Success':'Admin User (<b><u>{} {}</u></b>) Created and added To the Database'.format(theUser.firstName,theUser.lastName)})
+						encryptedErr=b64encode(encrypt(returnCode,encKey))
+						message.reply_channel.send({
+						        'text':json.dumps({'newA':'Insert','verdict':True,'MSG':encryptedErr})
+						})						
+						#user.objects.insert()
+					except Exception,e:
+						returnCode=json.dumps({'Err':e.message})
+						encryptedErr=b64encode(encrypt(returnCode,encKey))
+						message.reply_channel.send({
+						        'text':json.dumps({'newA':'Insert','verdict':False,'MSG':encryptedErr})
+						})						
 		else:
 			admins=user.objects(isAdmin=True)
 			encryptedAdmins=b64encode(encrypt(admins.to_json(),encKey))

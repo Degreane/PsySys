@@ -206,6 +206,35 @@ def connectedChannel(message):
 						message.reply_channel.send({
 						        'text':json.dumps({'newA':'Insert','verdict':False,'MSG':encryptedErr})
 						})						
+		elif messageJSON.has_key('updateA'):
+			# the ID is messageJSON['updateA']['id']
+			currentUser=copy.deepcopy(messageJSON['updateA'])
+			theUser= user.objects(id=messageJSON['updateA']['id'])
+			if theUser.count() == 1:
+				if currentUser.has_key('lgnName'):
+					# checking for lgnName if exists in such a way we should make sure not to override other accounts loginName
+					pass
+				else:
+					currentUser['updatedAt']=datetime.datetime.now()
+					try:
+						theID=currentUser['id']
+						del currentUser['id']
+						user.objects(id=theID).update(**currentUser)
+						returnCode=json.dumps({'Success':'User Updaated (<b><u>{} {}</u></b>)'.format(theUser[0].firstName,theUser[0].lastName)})
+						encryptedMSG=b64encode(encrypt(returnCode,encKey))
+						print('Updated')
+						message.reply_channel.send({
+						        'text':json.dumps({'updateA':'update','verdict':True,'MSG':encryptedMSG})
+						})
+					except Exception,e:
+						pp.pprint(e)
+						returnCode=json.dumps({'Err':e.message})
+						encryptedErr=b64encode(encrypt(returnCode,encKey))
+						message.reply_channel.send({
+					                'text':json.dumps({'updateA':'update','verdict':False,'MSG':encryptedErr})
+					        })	
+					
+			
 		else:
 			admins=user.objects(isAdmin=True)
 			encryptedAdmins=b64encode(encrypt(admins.to_json(),encKey))

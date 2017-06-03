@@ -24,17 +24,42 @@
                     </a>
                 </div>
                 <div class="panel-body collapse in" id="AdminIntroPanel">
-                        <div class="input-group input-group-md"><span class="input-group-addon"><i class="fa fa-binoculars"></i></span><input type="text" class="form-control text-center pull-right" placeholder="Quick Search ..."></div><br>
-                        <div><a href="#" class="btnMe" on-click="@this.ViewAdmins('T'),false">Total &nbsp;&nbsp;<span class="badge badge-notify-green"><%= adm.Tcount %></span></a></div>
-                        <div><a href="#" class="btnMe" on-click="@this.ViewAdmins('E'),false"> Enabled &nbsp;&nbsp;<span class="badge badge-notify-green"><%= adm.Ecount %></span></a></div>
-                        <div><a href="#" class="btnMe" on-click="@this.ViewAdmins('D'),false"> Disabled/Deleted &nbsp;&nbsp;<span class="badge badge-notify-red"><%= adm.Dcount %></span></a></div>
+                        <div class="input-group input-group-md"><span class="input-group-addon"><i class="fa fa-binoculars"></i></span><input type="text" class="form-control text-center pull-right" placeholder="Quick Search ..." value='<%=adm.filter%>'></div><br>
+                        <div><a href="#" class="btnMe" on-click="@this.ViewAdmins('Total'),false"> All &nbsp;&nbsp;<span class="badge badge-notify-green"><%= adm.Tcount %></span></a></div>
+                        <div><a href="#" class="btnMe" on-click="@this.ViewAdmins('Enabled'),false"> Enabled &nbsp;&nbsp;<span class="badge badge-notify-green"><%= adm.Ecount %></span></a></div>
+                        <div><a href="#" class="btnMe" on-click="@this.ViewAdmins('Disabled/Deleted'),false"> Disabled/Deleted &nbsp;&nbsp;<span class="badge badge-notify-red"><%= adm.Dcount %></span></a></div>
                         <div><a href="#" class="btnMe" on-click="@this.NewAdmin('Open'),false"> Add New <i class="fa fa-cog"></i></a></div>
                 </div>
             </div>
         </div>
+         <%= #if adm.listWhat %>
+            <div class="col-md-5">
+                <div class="panel panel-primary">
+                    <div class="panel-heading text-center">
+                        <a class="panel-title logo" href="#LA" aria-controls="LA" data-toggle="collapse">
+                        Listing <b><u><%= adm.listWhat %></u></b> Admins
+                        </a>
+                    </div>
+                    <div class="panel-body collapse in"  id="LA">
+                        <datatable data='<%= adm.viewList %>' columns="<%= columns %>" dynamicColumns=false selectionmode='row' >
+                            <%= #partial createdAt %>
+                                <%= moment(this['$date']).toString() %>
+                            <%= /partial %>
+                            <%= #partial Name %>
+                                <%= showThisUser(this) %>
+                            <%= /partial %>
+                            <%= #partial Status %>
+                                <a href="#" on-click="@this.parent.toggleED(this),false"><%% EnableDisable(this) %%></a>
+                            <%= /partial %>
+                        </datatable>
+                    </div>
+                </div>
+            </div>
+         <%= /if %>
     <%= /if %>
         </div>
     </div>
+   
     <%= #if newA.enabled %>
         <div class="modal fade in" tabindex="-1" role="dialog" data-show="true" style="display:block;background-color:rgba(0,0,0,0.8);opacity:1;overflow:auto;">
             <div class="modal-dialog" role="document" style="width:70%;">
@@ -363,13 +388,33 @@
                     tripleDelimiters:['<%%','%%>'],
                     template:'#HtmlBodyContentTpl',
                     el:'#HtmlBodyContent',
+                    components:{
+                        datatable:RactiveDatatable,
+                    },
                     data: {
+                        moment:function(data){
+                            return moment(data)
+                        },
+                        showThisUser:function(rec){
+                            return rec.firstName +' ' +rec.lastName
+                        },
+                        EnableDisable:function(rec){
+                            if (rec.Enabled == true){
+                                HT= "<h4 class='btn btn-success btnMe btn-xs boxMe'>Enabled</h4>"
+                            }else{
+                                HT= "<h4 class='btn btn-danger btnMe btn-xs boxMe'>Disabled</h4>"
+                            }
+                            return HT
+                        },
                         CU:{},
                         adm:{
                             list:[],
                             Tcount:0,
                             Ecount:0,
-                            Dcount:0
+                            Dcount:0,
+                            filter:null,
+                            viewList:[],
+                            listWhat:false
                         },
                         newA:{
                             enabled:false,
@@ -395,8 +440,33 @@
                             },
                         }
                     },
+                    computed :{
+                        columns :function(){
+                            return {
+                                'Name':{},
+                                'lgnName':{header:'UserName'},
+                                'createdAt':{header:'Created At'},
+                                'Status':{},
+                                'id':{display:false},
+                            }
+                        
+                        },
+                        
+                    },
+                    toggleED:function(rec){
+                        theUser={
+                            id:rec['_id']['$oid'],
+                            Enabled:!rec['Enabled']
+                        }
+                        socketIO.send(CryptoJS.AES.encrypt(JSON.stringify({'updateA':theUser,'target':'adm'}),enc))
+                        
+                    },
                     ViewAdmins:function(W){
-                        console.log('Viewing ',W)
+                        //console.log('Viewing ',W)
+                        var myThis=this
+                        // we set the adm.listWhat to the type of the list we need.
+                        // types are T=Total,E=Enabled,D=Deleted/Disabled
+                        myThis.set('adm.listWhat',W)
                     },NewAdmin:function(W){
                         /*
                             New Admin 
@@ -467,13 +537,29 @@
                         }
                     },CloseNew:function(){
                         this.set('newA.enabled',false)
-                    }
+                    },
                 })
                 htmlBodyContentApp.observe('adm.list',function(newC,oldC,keyC){
                     htmlBodyContentApp.set('adm.Tcount',newC.length)
                     var Admins=TAFFY(newC)
                     htmlBodyContentApp.set('adm.Ecount',Admins({'Enabled':true,'Deleted':false}).count())
                     htmlBodyContentApp.set('adm.Dcount',Admins([{'Enabled':false},{'Deleted':true}]).count())
+                    var listing=htmlBodyContentApp.get('adm.listWhat')
+                    htmlBodyContentApp.set('adm.listWhat',false)
+                    htmlBodyContentApp.set('adm.listWhat',listing)
+                })
+                htmlBodyContentApp.observe('adm.listWhat',function(newC,oldC,keyC){
+                    console.log(newC)
+                    var Admins=TAFFY(htmlBodyContentApp.get('adm.list'))
+                    if(newC=='Total'){
+                        htmlBodyContentApp.set('adm.viewList',Admins())
+                    }else if(newC=='Enabled'){
+                        htmlBodyContentApp.set('adm.viewList',Admins({'Enabled':true,'Deleted':false}))
+                    }else if(newC=='Disabled/Deleted') {
+                        htmlBodyContentApp.set('adm.viewList',Admins([{'Enabled':false},{'Deleted':true}]))
+                    }else{
+                        htmlBodyContentApp.set('adm.viewList',[])
+                    }
                 })
                 socketIO.onmessage=function(event){
                     var data =JSON.parse(event['data'])
@@ -576,6 +662,13 @@
                                 }
                             }
                         
+                        }
+                    }
+                    if(data.hasOwnProperty('updateA')){
+                        if(data.hasOwnProperty('verdict')){
+                            if(data['verdict'] == true){
+                                socketIO.send(CryptoJS.AES.encrypt(JSON.stringify({'id':'{{ theUser.id }}','target':'adm'}),enc))
+                            }
                         }
                     }
                 }

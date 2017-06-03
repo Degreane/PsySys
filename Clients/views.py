@@ -20,7 +20,7 @@ import tempfile as tf
 
 # Create your views here.
 def index(request):
-    request.session.set_expiry(30)
+    request.session.set_expiry(600)
     #return HttpResponse("SomeThing requested {} to be sent back ".format(request))
     print("############ R! ###############")
     reqSessionID=request.session.session_key

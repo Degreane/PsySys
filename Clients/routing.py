@@ -183,7 +183,7 @@ def connectedChannel(message):
 					        'text':json.dumps({'newA':'Insert','verdict':False,'MSG':encryptedErr})
 					})
 				else:
-					print str(messageJSON['profile'])
+					#print str(messageJSON['profile'])
 					try :
 						theUser = user()
 						messageJSON['profile']['createdAt']=datetime.datetime.now()
@@ -224,7 +224,6 @@ def connectedChannel(message):
 						user.objects(id=theID).update(**currentUser)
 						returnCode=json.dumps({'Success':'User Updated (<b><u>{} {}</u></b>)'.format(theUser[0].firstName,theUser[0].lastName)})
 						encryptedMSG=b64encode(encrypt(returnCode,encKey))
-						print('Updated')
 						message.reply_channel.send({
 						        'text':json.dumps({'updateA':'update','verdict':True,'MSG':encryptedMSG})
 						})
@@ -283,7 +282,58 @@ def connectedChannel(message):
 				message.reply_channel.send({
 				        'text':json.dumps({'editA':encryptedMSG,'verdict':True})
 				})
-			
+		elif messageJSON.has_key('EditA'):
+			'''
+			The user 2 update is in messageJSON['profile']
+			get the ID
+			check if the id exists and is an admin
+			check the login name is for this id 
+			'''
+			theUser=copy.deepcopy(messageJSON['profile'])
+			theID=theUser['_id']['$oid']
+			qID=Q(isAdmin=True) & Q(id=theID)
+			dbUser=user.objects(qID)
+			if dbUser.count() > 0:
+				if theUser['lgnName'] == dbUser[0]['lgnName']:
+					del theUser['_id']
+					theUser['updatedAt']=datetime.datetime.now()
+					del theUser['InternalId']
+					del theUser['createdAt']
+					try:
+						user.objects(qID).update(**theUser)					
+						returnCode=json.dumps({'Success':True})
+						encryptedErr=b64encode(encrypt(returnCode,encKey))
+						message.reply_channel.send({
+							'text':json.dumps({'EditA':encryptedErr,'verdict':True})
+						})
+					except Exception,e:
+						pp.pprint(e)
+				else:
+					# If lgnName is not the same then we check if the lgnName Exists 
+					# if it exists then we abort with a message
+					# if it does not exist then we continue and update as needed.
+					qlgnName=Q(isAdmin=True) & Q(lgnName=theUser['lgnName'])
+					dbUserName=user.objects(qlgnName)
+					if dbUserName.count()>0:
+						returnCode=json.dumps({'Err':'<a href="#lgnName">UserName</a> Exists. Choose another'})
+						encryptedErr=b64encode(encrypt(returnCode,encKey))
+						message.reply_channel.send({
+							'text':json.dumps({'EditA':encryptedErr,'verdict':False})
+						})
+					else:
+						del theUser['_id']
+						theUser['updatedAt']=datetime.datetime.now()
+						del theUser['InternalId']
+						del theUser['createdAt']
+						try:
+							user.objects(qID).update(**theUser)					
+							returnCode=json.dumps({'Success':True})
+							encryptedErr=b64encode(encrypt(returnCode,encKey))
+							message.reply_channel.send({
+								'text':json.dumps({'EditA':encryptedErr,'verdict':True})
+							})
+						except Exception,e:
+							pp.pprint(e)						
 		'''
 		else:
 			admins=user.objects(isAdmin=True)

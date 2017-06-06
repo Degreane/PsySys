@@ -13,6 +13,26 @@
 {% block ractive_html %}
 <!-- Here We should Update the system into Having Our Ractive Working as it should !-->
 <script id="HtmlBodyContentTpl" type="text/ractive-x">
+    <%=#partial DealersMenu%>
+        <div class="col-md-3">
+            <div class="panel panel-primary">
+                <div class="panel-heading text-center">
+                    <a class="panel-title  logo" href="#DealerIntroPanel" aria-controls="DealerIntroPanel" data-toggle="collapse">
+                        Dealers Menu
+                    </a>
+                </div>
+                <div class="panel-body collapse fade" id="DealerIntroPanel">
+                        <div class="input-group input-group-md"><span class="input-group-addon"><i class="fa fa-binoculars"></i></span><input type="text" class="form-control text-center pull-right" placeholder="Quick Search ..." value='<%=dealer.filter%>'></div><br>
+                        <div><a href="#" class="btnMe" on-click="@this.ViewDealers('Total'),false"> All &nbsp;&nbsp;<span class="badge badge-notify-green"><%= dlr.Tcount %></span></a></div>
+                        <div><a href="#" class="btnMe" on-click="@this.ViewDealers('Enabled'),false"> Enabled &nbsp;&nbsp;<span class="badge badge-notify-green"><%= dlr.Ecount %></span></a></div>
+                        <div><a href="#" class="btnMe" on-click="@this.ViewDealers('Disabled/Deleted'),false"> Disabled/Deleted &nbsp;&nbsp;<span class="badge badge-notify-red"><%= dlr.Dcount %></span></a></div>
+                        <%= #if CU.isAdmin %>
+                            <div><a href="#" class="btnMe" on-click="@this.NewDealer('Open'),false"> Add New <i class="fa fa-cog"></i></a></div>
+                        <%= /if %>
+                </div>
+            </div>
+        </div>
+    <%=/partial%>
     <div class="container-fluid">
         <div class="row">
     <%= #if CU.isAdmin %>
@@ -36,6 +56,7 @@
             <div class="col-md-4">
                 <div class="panel panel-primary">
                     <div class="panel-heading text-center">
+                        <button type="button" class="close" on-click="@this.CloseListA(),false"><i class="fa fa-times-circle" aria-hidden="true"></i></button>
                         <a class="panel-title logo" href="#LA" aria-controls="LA" data-toggle="collapse">
                         Listing <b><u><%= adm.listWhat %></u></b> Admins
                         </a>
@@ -52,6 +73,9 @@
                     </div>
                 </div>
             </div>
+            <%=>DealersMenu%>
+        <%=else%>
+            <%=>DealersMenu%>
          <%= /if %>
     <%= /if %>
         </div>
@@ -63,7 +87,142 @@
                 <div class="modal-content">
                     <div class="modal-header">
                         <button type="button" class="close" on-click="@this.CloseEditA(),false"><i class="fa fa-times-circle" aria-hidden="true"></i></button>
-                        <h4 class="modal-title text-center logo ">New Admin (<%= EditA.firstName %> <%= EditA.lastName %>)</h4>
+                        <h4 class="modal-title text-center logo ">Edit Admin (<%= EditA.firstName %> <%= EditA.lastName %>)</h4>
+                    </div>
+                    <div class="modal-body text-center">
+                        <div class="container-fluid">
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="panel panel-primary">
+                                        <div class="panel-body">
+                                            <form class="form-horizontal">
+                                                <div class="form-group">
+                                                    <label for="firstName" class="col-md-2 control-label">First Name :</label>
+                                                    <div class="col-md-4">
+                                                        <input type="text" placeholder="First Name :" class="form-control text-center" id="firstName" value="<%= EditA.firstName %>">
+                                                    </div>
+                                                    <label for="lastName" class="col-md-2 control-label">Last Name :</label>
+                                                    <div class="col-md-4">
+                                                        <input type="text" placeholder="Last Name :" class="form-control text-center" id="lastName" value="<%= EditA.lastName %>">
+                                                    </div>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="lgnName" class="col-md-2 control-label">UserName :</label>
+                                                    <div class="col-md-4">
+                                                        <input type="text" placeholder="User Name :" class="form-control text-center" id="lgnName" value="<%= EditA.lgnName %>">
+                                                    </div>
+                                                    <label for="lgnPass" class="col-md-2 control-label">PassWord :</label>
+                                                    <div class="col-md-4">
+                                                        <input type="password" placeholder="PassWord :" class="form-control text-center" id="lgnPass" value="<%= EditA.lgnPass %>">
+                                                    </div>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="Desc" class="col-md-2 control-label"> Description :</label>
+                                                    <div class="col-md-10">
+                                                        <textarea type="text" placeholder="Description : " class="form-control text-center" id="Desc" ><%= EditA.Desc %></textarea>
+                                                    </div>
+                                                </div>
+                                                    <div class="form-group">
+                                                    <label for="Comment" class="col-md-2 control-label"> Comment :</label>
+                                                    <div class="col-md-10">
+                                                        <textarea type="text" placeholder="Comment : " class="form-control text-center" id="Comment" ><%= EditA.Comment %></textarea>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div class="form-group">
+                                                    <label for="createdAt" class="col-md-2 control-label"> Created At :</label>
+                                                    <div class="col-md-4">
+                                                        <input type="text" placeholder="Created At : " class="form-control text-center" id="createdAt" disabled value="<%= EditA.createdAt %>">
+                                                    </div>
+                                                    <label for="updatedAt" class="col-md-2 control-label"> Updated At :</label>
+                                                    <div class="col-md-4">
+                                                        <input type="text" placeholder="Updated At : " class="form-control text-center" id="updatedAt" disabled value="<%= EditA.updatedAt %>">
+                                                    </div>
+                                                </div>
+                                                 <div class="form-group">
+                                                    <label for="Country" class="col-md-2 control-label"> Country :</label>
+                                                    <div class="col-md-4">
+                                                        <input type="text" placeholder="Country : " class="form-control text-center" id="Country" value="<%= EditA.Country %>">
+                                                    </div>
+                                                    <label for="City" class="col-md-2 control-label"> City :</label>
+                                                    <div class="col-md-4">
+                                                        <input type="text" placeholder="City : " class="form-control text-center" id="City" value="<%= EditA.City %>">
+                                                    </div>
+                                                </div>
+                                                 <div class="form-group">
+                                                    <label for="Street" class="col-md-2 control-label"> Street :</label>
+                                                    <div class="col-md-4">
+                                                        <input type="text" placeholder="Street : " class="form-control text-center" id="Street" value="<%= EditA.Street %>">
+                                                    </div>
+                                                    <label for="Building" class="col-md-2 control-label"> Building :</label>
+                                                    <div class="col-md-4">
+                                                        <input type="text" placeholder="Building : " class="form-control text-center" id="Building" value="<%= EditA.Building %>">
+                                                    </div>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="Floor" class="col-md-2 control-label"> Floor :</label>
+                                                    <div class="col-md-4">
+                                                        <input type="text" placeholder="Floor : " class="form-control text-center" id="Floor" value="<%= EditA.Floor %>">
+                                                    </div>
+                                                    <label for="internalID" class="col-md-2 control-label"> InternalID :</label>
+                                                    <div class="col-md-4">
+                                                        <input type="text" placeholder="InternalID : " class="form-control text-center" id="internalID" disabled value="<%= EditA.InternalId %>">
+                                                    </div>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="EMail" class="col-md-2 control-label"> E-Mail :</label>
+                                                    <div class="col-md-4">
+                                                        <input type="text" placeholder="E-Mail : " class="form-control text-center" id="EMail" value="<%= EditA.Email %>">
+                                                    </div>
+                                                    <label for="Phone" class="col-md-2 control-label"> Phone :</label>
+                                                    <div class="col-md-4">
+                                                        <input type="text" placeholder="Phone Number : " class="form-control text-center" id="Phone" value="<%= EditA.Phone %>">
+                                                    </div>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="Enabled" class="col-md-2 control-label"> Enabled :</label>
+                                                    <div class="col-md-4">
+                                                        <%= #if EditA.Enabled %>
+                                                            <button class="btn btn-success btn-xs boxMe" on-click="@this.toggleEditAEnabled(),false">Enabled</button>
+                                                        <%= else %>
+                                                            <button class="btn btn-danger btn-xs boxMe" on-click="@this.toggleEditAEnabled(),false">Disabled</button>
+                                                        <%= /if %>
+                                                    </div>
+                                                    <label for="Deleted" class="col-md-2 control-label"> Deleted :</label>
+                                                    <div class="col-md-4">
+                                                        <%= #if EditA.Deleted %>
+                                                            <button class="btn btn-danger btn-xs boxMe" on-click="@this.toggleEditADeleted(),false">True</button>
+                                                        <%= else %>
+                                                            <button class="btn btn-success btn-xs boxMe" on-click="@this.toggleEditADeleted(),false">False</button>
+                                                        <%= /if %>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group">
+                                                    <div class="col-md-10 col-md-offset-1">
+                                                        <button class="btn btn-primary btn-xs boxMe" on-click="@this.EditAdmin('Update'),false">Update</button>
+                                                        <button class="btn btn-default btn-xs boxMe" on-click="@this.EditAdmin('Reset'),false">Reset</button>
+                                                    </div>
+                                                </div>
+                                                <%= #if EditAErr %>
+                                                    <div class="col-md-12">
+                                                        <div class="alert alert-danger" role="danger">
+                                                            <%% EditAErr %%>
+                                                        </div>
+                                                    </div>
+                                                <%= /if %>
+                                                <%= #if EditASuccess %>
+                                                    <div class="col-md-12">
+                                                        <div class="alert alert-info" role="info">
+                                                            <%% EditASuccess %%>
+                                                        </div>
+                                                    </div>
+                                                <%= /if %>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -355,6 +514,7 @@
             </div>
         
     <%= /if %>
+    
 </script>
 {% endblock %}
 {% block ractive_js %} 
@@ -480,7 +640,7 @@
                         theUser={
                             id:rec['_id']['$oid'],
                         }
-                        console.log(theUser)
+                        //console.log(theUser)
                         socketIO.send(CryptoJS.AES.encrypt(JSON.stringify({'getA':theUser,'target':'adm'}),enc))
                     },
                     ViewAdmins:function(W){
@@ -491,6 +651,9 @@
                         myThis.set('adm.listWhat',W)
                         socketIO.send(CryptoJS.AES.encrypt(JSON.stringify({'id':"{{ theUser.id }}",'target':'adm','GET':W}),enc))
                         
+                    },
+                    CloseListA:function(){
+                        this.set('adm.listWhat',false)
                     },
                     CloseEditA:function(){
                         this.set('EditA',false)
@@ -563,7 +726,54 @@
                             }
                             
                         }
-                    },CloseNew:function(){
+                    },
+                    EditAdmin:function(W){
+                        var myThis=this;
+                        if (W=='Update'){
+                            var theUser=myThis.get('EditA')
+                            var Err=false;
+                            this.set('EditAErr',false)
+                            this.set('EditASuccess',false)
+                            if (theUser['firstName'].trim().length==0 && theUser['lastName'].trim().length==0){
+                                if(Err==false){
+                                    Err='At least <a href="#firstName">First Name</a> should be set'
+                                }else {
+                                    Err=Err+'<br>At least <a href="#firstName">First Name</a> should be set'
+                                }
+                            }
+                            if (theUser['lgnName'].trim().length == 0){
+                                if(Err==false){
+                                    Err='<a href="#lgnName">UserName</a> should be set'
+                                }else {
+                                    Err=Err+'<br><a href="#lgnName">UserName</a> should be set '
+                                }
+                            }
+                            if(theUser['lgnPass'].trim().length == 0 ){
+                                if(Err == false){
+                                    Err='<a href="#lgnPass">PassWord</a> should be set'
+                                }else{
+                                    Err=Err+'<br>'+'<a href="#lgnPass">PassWord</a> should be set'
+                                }
+                            }
+                            if (Err==false){
+                                socketIO.send(CryptoJS.AES.encrypt(JSON.stringify({'EditA':'Update','target':'adm','profile':theUser}),enc))
+                            }else{
+                                myThis.set('EditAErr',Err)
+                            }
+                        }
+                    },
+                    toggleEditAEnabled:function(){
+                        var myThis=this
+                        myThis.set('EditA.Enabled',!myThis.get('EditA.Enabled'))
+                    },
+                    toggleEditADeleted:function(){
+                      var myThis=this
+                      myThis.set('EditA.Deleted',!myThis.get('EditA.Deleted'))
+                      if (myThis.get('EditA.Deleted') == true) {
+                        myThis.set('EditA.Enabled',false)
+                      }
+                    },
+                    CloseNew:function(){
                         this.set('newA.enabled',false)
                     },
                 })
@@ -583,8 +793,8 @@
                         //console.log(data['CU'])
                         //console.log(CryptoJS.AES.decrypt(data['CU'],enc).toString(CryptoJS.enc.Utf8))
                         var CU=JSON.parse(CryptoJS.AES.decrypt(data['CU'],enc).toString(CryptoJS.enc.Utf8))
-                        CU['createdAt']=moment(CU['createdAt']['$date'],'X').toString() || moment()
-                        CU['updatedAt']=moment(CU['updatedAt']['$date'],'X').toString() || moment()
+                        CU['createdAt']=moment(CU['createdAt']['$date'],'x').toString() || moment()
+                        CU['updatedAt']=moment(CU['updatedAt']['$date'],'x').toString() || moment()
                         navbarApp.set('CU',CU)
                         htmlBodyContentApp.set('CU',CU)
                         if (CU['isAdmin']==true){
@@ -727,10 +937,24 @@
                     if(data.hasOwnProperty('editA')){
                         if (data['verdict']==true){
                             var decryptedJSON=JSON.parse(CryptoJS.AES.decrypt(data['editA'],enc).toString(CryptoJS.enc.Utf8))
+                            console.log(decryptedJSON)
+                            decryptedJSON[0]['createdAt']=moment(decryptedJSON[0]['createdAt']['$date'],'x').toString() || moment()
+                            decryptedJSON[0]['updatedAt']=moment(decryptedJSON[0]['updatedAt']['$date'],'x').toString() || moment()
                             htmlBodyContentApp.set('EditA',decryptedJSON[0])
                             console.log(decryptedJSON[0])
                         }else{
                             window.location='/LogOut'
+                        }
+                    }
+                    if(data.hasOwnProperty('EditA')){
+                        if(data['verdict']==true){
+                            // we should update CU
+                            // we should update admin list 
+                            socketIO.send(CryptoJS.AES.encrypt(JSON.stringify({'id':'{{ theUser.id }}','target':'adm','GETCount':true}),enc))
+                            var listWhat=htmlBodyContentApp.get('adm.listWhat')
+                            socketIO.send(CryptoJS.AES.encrypt(JSON.stringify({'id':"{{ theUser.id }}",'target':'adm','GET':listWhat}),enc))
+                            socketIO.send(CryptoJS.AES.encrypt(JSON.stringify({'id':'{{ theUser.id }}','target':'CU'}),enc))
+                            console.log("{{ theUser.id }}")
                         }
                     }
                 }

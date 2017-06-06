@@ -3,6 +3,7 @@ from __future__ import unicode_literals
 
 from django.db import models
 import mongoengine as mg
+#from mongoengine.visitor import Q
 
 mg.connect('SailsAdySys')
 
@@ -41,5 +42,6 @@ class user(mg.Document):
     Down=mg.IntField()
     Up=mg.IntField()
     
+   
 
 # Create your models here.

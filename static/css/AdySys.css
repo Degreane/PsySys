@@ -162,11 +162,19 @@ input {
 .noPaddrightMe {
     padding-right: 0px;
 }
+.ractive-datatable td {
+    text-align: center !important;
+    padding: 0.5em !important;
+    white-space: pre-line !important;
+}
+.btnFnt {
+    font-size: 10px;
+}
 .btnMe {
     display: inline-block;
     padding: auto;
     margin-bottom: 0;
-    font-size: 14px;
+    
     font-weight: normal;
     line-height: 1.42857143;
     text-align: center;

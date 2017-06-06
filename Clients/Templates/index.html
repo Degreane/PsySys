@@ -33,7 +33,7 @@
             </div>
         </div>
          <%= #if adm.listWhat %>
-            <div class="col-md-5">
+            <div class="col-md-4">
                 <div class="panel panel-primary">
                     <div class="panel-heading text-center">
                         <a class="panel-title logo" href="#LA" aria-controls="LA" data-toggle="collapse">
@@ -41,15 +41,12 @@
                         </a>
                     </div>
                     <div class="panel-body collapse in"  id="LA">
-                        <datatable data='<%= adm.viewList %>' columns="<%= columns %>" dynamicColumns=false selectionmode='row' >
-                            <%= #partial createdAt %>
-                                <%= moment(this['$date']).toString() %>
+                        <datatable data='<%= adm.list %>' columns="<%= columns %>" dynamicColumns=false selectionMode='row' >
+                            <%= #partial St %>
+                                <a href="#" on-click="@this.parent.toggleED(this),false"><%% this.Status %%></a>
                             <%= /partial %>
-                            <%= #partial Name %>
-                                <%= showThisUser(this) %>
-                            <%= /partial %>
-                            <%= #partial Status %>
-                                <a href="#" on-click="@this.parent.toggleED(this),false"><%% EnableDisable(this) %%></a>
+                            <%= #partial Act %>
+                                <a href="#" on-click="@this.parent.Edit(this),false"><button class="btn btn-xs btn-info boxMe btnFnt">Edit</button></a>
                             <%= /partial %>
                         </datatable>
                     </div>
@@ -60,6 +57,18 @@
         </div>
     </div>
    
+    <%= #if EditA %>
+        <div class="modal fade in" tabindex="-1" role="dialog" data-show="true" style="display:block;background-color:rgba(0,0,0,0.8);opacity:1;overflow:auto;">
+            <div class="modal-dialog" role="document" style="width:70%;">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" on-click="@this.CloseEditA(),false"><i class="fa fa-times-circle" aria-hidden="true"></i></button>
+                        <h4 class="modal-title text-center logo ">New Admin (<%= EditA.firstName %> <%= EditA.lastName %>)</h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+    <%= /if %>
     <%= #if newA.enabled %>
         <div class="modal fade in" tabindex="-1" role="dialog" data-show="true" style="display:block;background-color:rgba(0,0,0,0.8);opacity:1;overflow:auto;">
             <div class="modal-dialog" role="document" style="width:70%;">
@@ -373,6 +382,10 @@
                     },toggleEnabled:function(){
                         this.set('CU.Enabled',!this.get('CU.Enabled'))
                     },toggleDeleted:function(){
+                        var CurrentDeleted=this.get('CU.Deleted')
+                        if (CurrentDeleted == false){
+                            this.set('CU.Enabled',false)
+                        }
                         this.set('CU.Deleted',!this.get('CU.Deleted'))
                     },resetCU:function(){
                         socketIO.send(CryptoJS.AES.encrypt(JSON.stringify({'id':'{{ theUser.id }}','target':'CU'}),enc))
@@ -392,17 +405,11 @@
                         datatable:RactiveDatatable,
                     },
                     data: {
-                        moment:function(data){
-                            return moment(data)
-                        },
-                        showThisUser:function(rec){
-                            return rec.firstName +' ' +rec.lastName
-                        },
                         EnableDisable:function(rec){
-                            if (rec.Enabled == true){
-                                HT= "<h4 class='btn btn-success btnMe btn-xs boxMe'>Enabled</h4>"
+                            if (rec == true){
+                                HT= "<h4 class='btn btn-success btnMe btn-xs boxMe btnFnt'>Enabled</h4>"
                             }else{
-                                HT= "<h4 class='btn btn-danger btnMe btn-xs boxMe'>Disabled</h4>"
+                                HT= "<h4 class='btn btn-danger btnMe btn-xs boxMe btnFnt'>Disabled</h4>"
                             }
                             return HT
                         },
@@ -412,9 +419,6 @@
                             Tcount:0,
                             Ecount:0,
                             Dcount:0,
-                            filter:null,
-                            viewList:[],
-                            listWhat:false
                         },
                         newA:{
                             enabled:false,
@@ -445,21 +449,39 @@
                             return {
                                 'Name':{},
                                 'lgnName':{header:'UserName'},
-                                'createdAt':{header:'Created At'},
-                                'Status':{},
+                                'CreatedAt':{header:'Created At'},
+                                'St':{header:'Status'},
                                 'id':{display:false},
+                                'Enabled':{display:false},
+                                'Act':{}
                             }
                         
                         },
+                    },
+                    moment:function(data){
+                    console.log('The Data')
+                    console.log(data)
+                        return new Date(data).toString() 
                         
                     },
                     toggleED:function(rec){
+                        //console.log(rec)
+                        //console.log('Enabling/Disabling')
+                        
                         theUser={
                             id:rec['_id']['$oid'],
                             Enabled:!rec['Enabled']
                         }
                         socketIO.send(CryptoJS.AES.encrypt(JSON.stringify({'updateA':theUser,'target':'adm'}),enc))
+                        socketIO.send(CryptoJS.AES.encrypt(JSON.stringify({'id':'{{ theUser.id }}','target':'adm','GETCount':true}),enc))
                         
+                    },
+                    Edit:function(rec){
+                        theUser={
+                            id:rec['_id']['$oid'],
+                        }
+                        console.log(theUser)
+                        socketIO.send(CryptoJS.AES.encrypt(JSON.stringify({'getA':theUser,'target':'adm'}),enc))
                     },
                     ViewAdmins:function(W){
                         //console.log('Viewing ',W)
@@ -467,7 +489,13 @@
                         // we set the adm.listWhat to the type of the list we need.
                         // types are T=Total,E=Enabled,D=Deleted/Disabled
                         myThis.set('adm.listWhat',W)
-                    },NewAdmin:function(W){
+                        socketIO.send(CryptoJS.AES.encrypt(JSON.stringify({'id':"{{ theUser.id }}",'target':'adm','GET':W}),enc))
+                        
+                    },
+                    CloseEditA:function(){
+                        this.set('EditA',false)
+                    },
+                    NewAdmin:function(W){
                         /*
                             New Admin 
                         */
@@ -539,28 +567,6 @@
                         this.set('newA.enabled',false)
                     },
                 })
-                htmlBodyContentApp.observe('adm.list',function(newC,oldC,keyC){
-                    htmlBodyContentApp.set('adm.Tcount',newC.length)
-                    var Admins=TAFFY(newC)
-                    htmlBodyContentApp.set('adm.Ecount',Admins({'Enabled':true,'Deleted':false}).count())
-                    htmlBodyContentApp.set('adm.Dcount',Admins([{'Enabled':false},{'Deleted':true}]).count())
-                    var listing=htmlBodyContentApp.get('adm.listWhat')
-                    htmlBodyContentApp.set('adm.listWhat',false)
-                    htmlBodyContentApp.set('adm.listWhat',listing)
-                })
-                htmlBodyContentApp.observe('adm.listWhat',function(newC,oldC,keyC){
-                    console.log(newC)
-                    var Admins=TAFFY(htmlBodyContentApp.get('adm.list'))
-                    if(newC=='Total'){
-                        htmlBodyContentApp.set('adm.viewList',Admins())
-                    }else if(newC=='Enabled'){
-                        htmlBodyContentApp.set('adm.viewList',Admins({'Enabled':true,'Deleted':false}))
-                    }else if(newC=='Disabled/Deleted') {
-                        htmlBodyContentApp.set('adm.viewList',Admins([{'Enabled':false},{'Deleted':true}]))
-                    }else{
-                        htmlBodyContentApp.set('adm.viewList',[])
-                    }
-                })
                 socketIO.onmessage=function(event){
                     var data =JSON.parse(event['data'])
                     if(data.hasOwnProperty('enc')){
@@ -588,17 +594,17 @@
                                     Clients (clt)
                                     Plans   (pln)
                             */
-                            socketIO.send(CryptoJS.AES.encrypt(JSON.stringify({'id':'{{ theUser.id }}','target':'adm'}),enc))
-                            socketIO.send(CryptoJS.AES.encrypt(JSON.stringify({'id':'{{ theUser.id }}','target':'dlr'}),enc))
-                            socketIO.send(CryptoJS.AES.encrypt(JSON.stringify({'id':'{{ theUser.id }}','target':'clt'}),enc))
-                            socketIO.send(CryptoJS.AES.encrypt(JSON.stringify({'id':'{{ theUser.id }}','target':'pln'}),enc))
+                            socketIO.send(CryptoJS.AES.encrypt(JSON.stringify({'id':'{{ theUser.id }}','target':'adm','GETCount':true}),enc))
+                            socketIO.send(CryptoJS.AES.encrypt(JSON.stringify({'id':'{{ theUser.id }}','target':'dlr','GETCount':true}),enc))
+                            socketIO.send(CryptoJS.AES.encrypt(JSON.stringify({'id':'{{ theUser.id }}','target':'clt','GETCount':true}),enc))
+                            socketIO.send(CryptoJS.AES.encrypt(JSON.stringify({'id':'{{ theUser.id }}','target':'pln','GETCount':true}),enc))
                         }else if(CU['isDealer']==true){
                             /*
                                 The Difference here is that we are targeted for only what belongs to this dealer
                                 No More 
                             */
-                            socketIO.send(CryptoJS.AES.encrypt(JSON.stringify({'id':'{{ theUser.id }}','target':'clt'}),enc))
-                            socketIO.send(CryptoJS.AES.encrypt(JSON.stringify({'id':'{{ theUser.id }}','target':'pln'}),enc))
+                            socketIO.send(CryptoJS.AES.encrypt(JSON.stringify({'id':'{{ theUser.id }}','target':'clt','GETCount':'Me'}),enc))
+                            socketIO.send(CryptoJS.AES.encrypt(JSON.stringify({'id':'{{ theUser.id }}','target':'pln','GETCount':'Me'}),enc))
                         }
                         
                         //console.log(CU)
@@ -634,7 +640,42 @@
                         */
                         var decryptedJSON=CryptoJS.AES.decrypt(data['adm'],enc).toString(CryptoJS.enc.Utf8)
                         var decryptedMsg=JSON.parse(decryptedJSON)
-                        htmlBodyContentApp.animate('adm.list',decryptedMsg)
+                        console.log('Dec')
+                        console.log(decryptedMsg)
+                        console.log('<----Dec')
+                        var myMsg=_.map(decryptedMsg,function(item){
+                            if(item.Enabled==true){
+                                return {
+                                    'Name':item.firstName +' '+item.lastName,
+                                    'CreatedAt':moment(item.createdAt.$date).toString(),
+                                    '_id':item._id,
+                                    'lgnName':item.lgnName,
+                                    'Status':'<button class="btn btn-success btnMe btn-xs boxMe btnFnt">Enabled</button>',
+                                    'Enabled':item.Enabled
+                                    //"<h4 class='btn btn-success btnMe btn-xs boxMe btnFnt'>Enabled</h4>"
+                                }
+                            }else if(item.Enabled==false) {
+                                return {
+                                    'Name':item.firstName +' '+item.lastName,
+                                    'CreatedAt':moment(item.createdAt.$date).toString(),
+                                    '_id':item._id,
+                                    'lgnName':item.lgnName,
+                                    'Status':"<button class='btn btn-danger btnMe btn-xs boxMe btnFnt'>Disabled</button>",
+                                    'Enabled':item.Enabled
+                                }
+                            }else if(item.Deleted==true) {
+                                return {
+                                    'Name':item.firstName +' '+item.lastName,
+                                    'CreatedAt':moment(item.createdAt.$date).toString(),
+                                    '_id':item._id,
+                                    'lgnName':item.lgnName,
+                                    'Status':"<button class='btn btn-danger btnMe btn-xs boxMe btnFnt'>Deleted</button>",
+                                    'Enabled':item.Enabled
+                                }
+                            }
+
+                        })
+                        htmlBodyContentApp.animate('adm.list',myMsg)
                     }
                     if(data.hasOwnProperty('newA')){
                         if (data['newA']== 'InternalId'){
@@ -657,7 +698,8 @@
                                 }else {
                                     var Success=JSON.parse(CryptoJS.AES.decrypt(data['MSG'],enc).toString(CryptoJS.enc.Utf8))['Success']
                                     htmlBodyContentApp.animate('newA.Success',Success)
-                                    socketIO.send(CryptoJS.AES.encrypt(JSON.stringify({'id':'{{ theUser.id }}','target':'adm'}),enc))
+                                    //socketIO.send(CryptoJS.AES.encrypt(JSON.stringify({'id':'{{ theUser.id }}','target':'adm'}),enc))
+                                    // Need To Check The listWhat data first and send approperiate 
                                     socketIO.send(CryptoJS.AES.encrypt(JSON.stringify({'newA':'InternalId','target':'adm'}),enc))
                                 }
                             }
@@ -667,8 +709,28 @@
                     if(data.hasOwnProperty('updateA')){
                         if(data.hasOwnProperty('verdict')){
                             if(data['verdict'] == true){
-                                socketIO.send(CryptoJS.AES.encrypt(JSON.stringify({'id':'{{ theUser.id }}','target':'adm'}),enc))
+                            /*
+                                To Get the correct Data we should lookup first the default listWhat
+                                
+                            */
+                                var listWhat=htmlBodyContentApp.get('adm.listWhat')
+                                socketIO.send(CryptoJS.AES.encrypt(JSON.stringify({'id':'{{ theUser.id }}','target':'adm','GET':listWhat}),enc))
                             }
+                        }
+                    }
+                    if(data.hasOwnProperty('admCounts')){
+                        var decryptedJSON=JSON.parse(CryptoJS.AES.decrypt(data['admCounts'],enc).toString(CryptoJS.enc.Utf8))
+                        htmlBodyContentApp.set('adm.Tcount',decryptedJSON['Total'])
+                        htmlBodyContentApp.set('adm.Ecount',decryptedJSON['Enabled'])
+                        htmlBodyContentApp.set('adm.Dcount',decryptedJSON['Disabled'])
+                    }
+                    if(data.hasOwnProperty('editA')){
+                        if (data['verdict']==true){
+                            var decryptedJSON=JSON.parse(CryptoJS.AES.decrypt(data['editA'],enc).toString(CryptoJS.enc.Utf8))
+                            htmlBodyContentApp.set('EditA',decryptedJSON[0])
+                            console.log(decryptedJSON[0])
+                        }else{
+                            window.location='/LogOut'
                         }
                     }
                 }

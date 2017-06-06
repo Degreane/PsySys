@@ -15,6 +15,7 @@ from Crypto.Cipher import AES
 from random import choice
 from base64 import b64encode,b64decode
 from models import user
+from mongoengine.queryset import Q
 
 def derive_key_and_iv(password, salt, key_length, iv_length):
 	d = d_i = ''
@@ -60,6 +61,7 @@ def connectedChannel(message):
 	#print("\tEncKey is {}\n\tMessage is {}\n\tDecryptJson is {}\n".format(encKey,message['text'],decryptedJSON))
 	messageJSON=json.loads(decryptedJSON)
 	#print type(message.http_session)
+	pp.pprint(messageJSON)
 	if message.http_session is None:
 		print("Session type None")
 		redirectPage="/"
@@ -220,7 +222,7 @@ def connectedChannel(message):
 						theID=currentUser['id']
 						del currentUser['id']
 						user.objects(id=theID).update(**currentUser)
-						returnCode=json.dumps({'Success':'User Updaated (<b><u>{} {}</u></b>)'.format(theUser[0].firstName,theUser[0].lastName)})
+						returnCode=json.dumps({'Success':'User Updated (<b><u>{} {}</u></b>)'.format(theUser[0].firstName,theUser[0].lastName)})
 						encryptedMSG=b64encode(encrypt(returnCode,encKey))
 						print('Updated')
 						message.reply_channel.send({
@@ -235,6 +237,54 @@ def connectedChannel(message):
 					        })	
 					
 			
+		elif messageJSON.has_key('GET'):
+			
+			# This means we need to get the list of admins depending on the value of messageJSON['GET']
+			getWhat=messageJSON['GET']
+			if getWhat == 'Enabled':
+				print('Getting Enabled')
+				theList=user.objects(isAdmin=True,Enabled=True).only('id','createdAt','firstName','lastName','lgnName','Enabled','Deleted')
+				encryptedMSG=b64encode(encrypt(theList.to_json(),encKey))
+				message.reply_channel.send({
+					'text':json.dumps({'adm':encryptedMSG,'count':theList.count()})
+				})
+			elif getWhat == 'Disabled/Deleted' :
+				q=Q(isAdmin=True)  & (Q(Enabled=False) | Q(Deleted=True))
+				theList=user.objects(q).only('id','createdAt','firstName','lastName','lgnName','Enabled','Deleted')
+				encryptedMSG=b64encode(encrypt(theList.to_json(),encKey))
+				message.reply_channel.send({
+					'text':json.dumps({'adm':encryptedMSG,'count':theList.count()})
+				})
+			elif getWhat == 'Total' :
+				q=Q(isAdmin=True)
+				theList=user.objects(q).only('id','createdAt','firstName','lastName','lgnName','Enabled','Deleted')
+				encryptedMSG=b64encode(encrypt(theList.to_json(),encKey))
+				message.reply_channel.send({
+					'text':json.dumps({'adm':encryptedMSG,'count':theList.count()})
+				})
+		elif messageJSON.has_key('GETCount'):
+			if messageJSON['GETCount']==True:
+				qAll=Q(isAdmin=True)
+				qEnabled=Q(isAdmin=True) & Q(Enabled=True) & Q(Deleted=False)
+				qDisabled=Q(isAdmin=True)  & (Q(Enabled=False) | Q(Deleted=True))
+				Total=user.objects(qAll).count()
+				Enabled=user.objects(qEnabled).count()
+				Disabled=user.objects(qDisabled).count()
+				encryptedMSG=b64encode(encrypt(json.dumps({"Total":Total,"Enabled":Enabled,"Disabled":Disabled}),encKey))
+				message.reply_channel.send({
+				        'text':json.dumps({'admCounts':encryptedMSG})
+				})
+		elif messageJSON.has_key('getA'):
+			#print("Getting {}".format(messageJSON['getA']['id']))
+			qAll=Q(isAdmin=True) & Q(id=messageJSON['getA']['id'])
+			theUser=user.objects(qAll)
+			if theUser.count() > 0 :
+				encryptedMSG=b64encode(encrypt(theUser.to_json(),encKey))
+				message.reply_channel.send({
+				        'text':json.dumps({'editA':encryptedMSG,'verdict':True})
+				})
+			
+		'''
 		else:
 			admins=user.objects(isAdmin=True)
 			encryptedAdmins=b64encode(encrypt(admins.to_json(),encKey))
@@ -242,7 +292,7 @@ def connectedChannel(message):
 			message.reply_channel.send({
 				'text':json.dumps({'adm':encryptedAdmins,'count':admins.count()})
 			})
-			
+		'''	
 
 @channel_and_http_session
 def connectChannelid(message):

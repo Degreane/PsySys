@@ -57,7 +57,7 @@ def index(request):
                 pp.pprint(decryptedValuesJson)
                 print "Loads <"
                 # Now We have The lgnName,lgnPass We should get the current document in the server.
-                theUser=user.objects(lgnName=decryptedValuesJson['lgnName'][0],lgnPass=decryptedValuesJson['lgnPass'][0])
+                theUser=user.objects(lgnName=decryptedValuesJson['lgnName'][0].strip(),lgnPass=decryptedValuesJson['lgnPass'][0].strip())
                 if theUser.count() == 1:
                     print "Horray We have Record"
                     # we choose to get index Array[0] since the return of as_pymongo is an array of objects.

@@ -85,6 +85,7 @@ def processRequest(request):
 channel_routing = [
     include('Clients.routing.channel_routing',path=r'/id/index.html'),
     include('Clients.routing.channel_routing',path=r'/id/$'),
+    include('Clients.dealersRouting.channel_routing',path=r'/dlr/'),
     route('websocket.receive',connectedChannel),
     route('websocket.connect',connectChannel)
 ]

@@ -43,7 +43,7 @@
                         Admin Menu
                     </a>
                 </div>
-                <div class="panel-body collapse in" id="AdminIntroPanel">
+                <div class="panel-body collapse fade " id="AdminIntroPanel">
                         <div class="input-group input-group-md"><span class="input-group-addon"><i class="fa fa-binoculars"></i></span><input type="text" class="form-control text-center pull-right" placeholder="Quick Search ..." value='<%=adm.filter%>'></div><br>
                         <div><a href="#" class="btnMe" on-click="@this.ViewAdmins('Total'),false"> All &nbsp;&nbsp;<span class="badge badge-notify-green"><%= adm.Tcount %></span></a></div>
                         <div><a href="#" class="btnMe" on-click="@this.ViewAdmins('Enabled'),false"> Enabled &nbsp;&nbsp;<span class="badge badge-notify-green"><%= adm.Ecount %></span></a></div>
@@ -650,6 +650,15 @@
                         // types are T=Total,E=Enabled,D=Deleted/Disabled
                         myThis.set('adm.listWhat',W)
                         socketIO.send(CryptoJS.AES.encrypt(JSON.stringify({'id':"{{ theUser.id }}",'target':'adm','GET':W}),enc))
+                        
+                    },
+                    ViewDealers:function(W){
+                        var myThis=this
+                        /*
+                            Actually here we are going to view the Dealers and W shall hold what type of dealers we want to view.
+                            We just set location window to dealers and let django handle the rest.
+                        */
+                        window.location='/dealers?l='+W
                         
                     },
                     CloseListA:function(){

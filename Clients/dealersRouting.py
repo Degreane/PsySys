@@ -1,0 +1,138 @@
+from channels.auth import channel_session_user,channel_session_user_from_http,http_session
+from channels.routing import route, route_class
+from channels.sessions import channel_and_http_session,channel_session
+import datetime 
+import json
+import copy
+import pprint as pp
+from django.http import HttpResponse
+from django.http import HttpResponseRedirect
+
+from Crypto.Hash import MD5
+from hashlib import md5
+from Crypto import Random
+from Crypto.Cipher import AES
+from random import choice
+from base64 import b64encode,b64decode
+from models import user
+from mongoengine.queryset import Q
+
+def derive_key_and_iv(password, salt, key_length, iv_length):
+	d = d_i = ''
+	while len(d) < key_length + iv_length:
+		d_i = md5(d_i + password + salt).digest()
+		d += d_i
+	return d[:key_length], d[key_length:key_length+iv_length]
+
+def encrypt(data, password, key_length=32):
+	if len(data)%2 == 0:
+		data=data+" "	
+	bs = AES.block_size
+	salt = Random.new().read(bs - len('Salted__'))
+	key, iv = derive_key_and_iv(password, salt, key_length, bs)
+	cipher = AES.new(key, AES.MODE_CBC, iv)
+	ch1='Salted__' + salt
+	#print ch1
+	if len(data) == 0 or len(data) % bs != 0:
+		padding_length = bs - (len(data) % bs)
+		data += padding_length * chr(padding_length)
+	return ch1+cipher.encrypt(data)
+
+def decrypt(data,  password, key_length=32):
+	bs = AES.block_size
+	salt = data[:bs][len('Salted__'):]
+	#print len(salt)
+	key, iv = derive_key_and_iv(password, salt, key_length, bs)
+	cipher = AES.new(key, AES.MODE_CBC, iv)
+	chunk=data[bs:]
+	unpadded_text=cipher.decrypt(chunk)
+	padding_length=ord(unpadded_text[-1])
+	#print ("padding Length {}".format(padding_length))
+	padded_text=unpadded_text[:-padding_length]
+	return padded_text
+
+@channel_and_http_session
+def connectedChannel(message):
+	encKey=MD5.new(str(message.reply_channel)).hexdigest()
+	decryptedJSON=decrypt(b64decode(message['text']),encKey)
+	messageJSON=json.loads(decryptedJSON)
+	pp.pprint(messageJSON)
+	pp.pprint(message)
+	pp.pprint("ConnectedChannel")
+	if message.http_session is None:
+		print("Session type None")
+		redirectPage="/"
+		redirectParam="InvalidSession=true"
+		encryptedRedirectParam=b64encode(encrypt(redirectParam,encKey))
+		message.reply_channel.send({
+		        'text':json.dumps({'verdict':encryptedRedirectParam,'redirect':redirectPage})
+		})	
+	if messageJSON['target'] == 'CU':
+		# need to get the CurrentUser Logged In.
+		CU=user.objects(pk=messageJSON['id'])
+		if CU.count() == 1:
+			encryptedCUJsonStr=b64encode(encrypt(CU[0].to_json(),encKey))
+			message.reply_channel.send({
+			        'text':json.dumps({'CU':encryptedCUJsonStr})
+			})
+		else :
+			redirectPage="/LogOut"
+			message.reply_channel.send({
+			        'text':json.dumps({'redirect':redirectPage})
+			})
+	if messageJSON['target'] == 'CHK' :
+		if message.http_session is None:
+			redirectPage="/"
+			redirectParam="InvalidSession=true"
+			encryptedRedirectParam=b64encode(encrypt(redirectParam,encKey))
+			message.reply_channel.send({
+			        'text':json.dumps({'verdict':encryptedRedirectParam,'redirect':redirectPage})
+			})
+	if messageJSON['target'] == 'CNTS':
+		QAll=Q(isDealer=True)
+		QEnabled=Q(isDealer=True) & Q(Enabled=True)
+		QDeleted=Q(isDealer=True) & Q(Deleted=True)
+		QDisabled=Q(isDealer=True) & Q(Enabled=False)
+		AllCount=user.objects(QAll).count()
+		EnabledCount=user.objects(QEnabled).count()
+		DeletedCount=user.objects(QDeleted).count()
+		DisabledCount=user.objects(QDisabled).count()
+		CountsObj={
+		        'All':AllCount,
+		        'Ena':EnabledCount,
+		        'Dis':DisabledCount,
+		        'Del':DeletedCount
+		}
+		encryptedMSG=b64encode(encrypt(json.dumps(CountsObj),encKey))
+		message.reply_channel.send({
+		        'text':json.dumps({'CNTS':encryptedMSG})
+		})
+	if messageJSON['target'] == 'DLRS':
+		QQuery=Q(isDealer=True)
+		if messageJSON['type']=='All':
+			QQuery=Q(isDealer=True)
+		elif messageJSON['type']=='Ena':
+			QQuery=Q(isDealer=True) & Q(Enabled=True)
+		elif messageJSON['type'] == 'Dis' :
+			QQuery=Q(isDealer=True) & Q(Enabled=False)
+		elif messageJSON['type']=='Del':
+			QQuery=Q(isDealer=True) & Q(Deleted=True)
+		theList=user.objects(QQuery)
+		encryptedMSG=b64encode(encrypt(theList.to_json(),encKey))
+		message.reply_channel.send({
+		        'text':json.dumps({'DLRS':encryptedMSG})
+		})
+	
+@channel_and_http_session
+def connectChannelid(message):
+	pp.pprint(message)
+	pp.pprint("Connecting CHannel")
+	message.reply_channel.send({'accept':True,
+	        'text':json.dumps({'enc':MD5.new(str(message.reply_channel)).hexdigest()})
+	})	
+
+channel_routing = [
+        #route('http.request',processRequest),
+       route('websocket.connect',connectChannelid),
+       route('websocket.receive',connectedChannel)
+]

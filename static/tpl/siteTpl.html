@@ -16,6 +16,7 @@
         <script type="text/javascript" src="{% static 'js/taffy-min.js' %}"></script>
         <script type="text/javascript" src="{% static 'js/lodash.min.js' %}"></script>
         <script type="text/javascript" src="{% static 'js/ractive-datatable.js' %}"></script>
+        {% block socket_script %}
         <script type="text/javascript">
             var socketIO = new ReconnectingWebSocket('ws://' + window.location.host+'/id/')
             var enc=null
@@ -33,6 +34,7 @@
                 }
             },60000)
         </script>
+        {% endblock %}
         {% block header_script %}{% endblock %}
     </head>
     <body>
@@ -52,6 +54,7 @@
                         <ul class="nav navbar-nav navbar-right">
                             {% block lgnInlgnOut %}<li><a href="#" id="LogInBtn" class="logo">LogIn</a></li> {% endblock %}
                         </ul>
+                        {%block header_menus %}{% endblock %}
                     </div>
                 </div>
             </nav>

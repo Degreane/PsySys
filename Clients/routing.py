@@ -80,7 +80,7 @@ def connectedChannel(message):
 					'text':json.dumps({'verdict':encryptedRedirectParam,'redirect':redirectPage})
 				})
 	if messageJSON["target"] == 'login' and message.http_session.has_key('t'):
-		Client = user.objects(lgnName=messageJSON['lgnName'],lgnPass=messageJSON['lgnPass'] )
+		Client = user.objects(lgnName=messageJSON['lgnName'],lgnPass=messageJSON['lgnPass'])
 		if Client.count() == 1:
 			#pp.pprint(Client.__dict__)
 			SessEncKey=MD5.new(str(message.http_session['t'])).hexdigest()

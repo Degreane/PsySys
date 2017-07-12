@@ -1,0 +1,222 @@
+{% extends 'siteTpl.html' %}
+{% load staticfiles %}
+{% block title_html %} 
+
+Welcome {{ theUser.firstName }} {{ theUser.lastName }} 
+
+{% endblock %}
+{% block lgnInlgnOut %} <li><a href="/LogOut" id="lgnOut" class="logo" >LogOut <i class="fa fa-sign-out" aria-hidden="true"></i></a></li> {% endblock %}
+{% block socket_script %}
+	<script type="text/javascript">
+		var socketIO = new ReconnectingWebSocket('ws://' + window.location.host+'/dlr/')
+		var enc=null
+		var genUID = function(){
+			var sGuid="";for(i=0;i<16;i++){
+				sGuid += Math.floor(Math.random()*0xF).toString(0xF)
+			}
+			return sGuid
+		}
+		setInterval(function(){
+			if (enc !== null){
+				socketIO.send(CryptoJS.AES.encrypt(JSON.stringify({"CHKCONN":moment().toString(),"target":'CHK'}),enc))
+			}else {
+				window.location='/'
+			}
+		},60000)
+	</script>
+{% endblock %}
+{% block header_menus %}
+	<ul class="nav navbar-nav navbar-right">
+		<li><a href="/" id="returnMain" class="logo fa-hover-2x">Main <i class="fa fa-home"></i></a></li>
+	</ul>
+	{% if theUser.isDealer == True or theUser.isAdmin == True %}
+		<ul class="nav navbar-nav navbar-right">
+			<li><a href="/Clients" id="PlansPageNavLink" class="logo fa-hover-spin" >Clients <i class="fa fa-group" aria-hidden="true"></i></a></li>
+		</ul>
+	{% endif %}
+	{% if theUser.isAdmin == True %}
+		<ul class="nav navbar-nav navbar-right">
+			<li><a href="/Plans" id="PlansPageNavLink" class="logo fa-hover-spin" >Plans <i class="fa fa-pie-chart" aria-hidden="true"></i></a></li>
+		</ul>
+		<ul class="nav navbar-nav navbar-right">
+			<li>
+				<a href="/System" id="SystemPageNavLink" class="logo fa-hover-spin" >System <i class="fa fa-gears" aria-hidden="true"></i></a>
+			</li>
+		</ul>
+	{% endif %}
+	<ul class="nav navbar-nav navbar-left">
+		<li><a href="#" id="DealersPageNavLink" class="logo" style="font-size:large;">Dealers Page</a></li>
+	</ul>
+	<ul id="internalLinks" class="nav navbar-nav navbar-left">
+	</ul>
+{% endblock %}
+{% block navbar_brand %} <span id="NavBarBrand">  </span> {% endblock %}
+{% block content_html %} 
+	<span id="HtmlBodyContent"></span>
+{% endblock %}
+{% block ractive_html %}
+	<script id="NavBarBrandTpl" type="text/ractive-x">
+		<a class="navbar-brand logo" href="#" on-click="@this.ViewCU(),false">
+			<%= CU.lgnName %>
+		</a>
+	</script>
+	<script id="internalLinksTpl" type="text/ractive-x">
+		<li><a href="#" id="All" class="logo fa-hover-2x" on-click="@this.listDealers('All'),false">
+			All 
+			<span class="badge badge-notify-green">
+				<%= Counts.All %>
+			</span>
+			<!--<i class="fa fa-table" aria-hidden="true"></i>!-->
+		</a></li>
+		<li><a href="#" id="Ena" class="logo fa-hover-2x" on-click="@this.listDealers('Ena'),false"> Enabled 
+			<span class="badge badge-notify-green">
+				<%= Counts.Ena %>
+			</span>
+			<!--<i class="fa fa-table" aria-hidden="true"></i><!-->
+		</a> </li>
+		<li><a href="#" id="Dis" class="logo fa-hover-2x" on-click="@this.listDealers('Dis'),false"> Disabled 
+			<span class="badge badge-notify-red">
+				<%= Counts.Dis %>
+			</span>
+		<!--<i class="fa fa-table" aria-hidden="true"></i> !-->
+		</a> </li>
+		<li><a href="#" id="Del" class="logo fa-hover-2x" on-click="@this.listDealers('Del'),false"> Deleted 
+			<span class="badge badge-notify-red">
+				<%= Counts.Del %>
+			</span>
+		<!--<i class="fa fa-table" aria-hidden="true"></i> !-->
+		</a> </li>
+	</script>
+	<script id="HtmlBodyContentTpl" type="text/ractive-x">
+		<%= #if show %>
+			<datatable data='<%= theList %>' columns="<%= columns %>" dynamicColumns=false selectionMode='row' >
+				<%= #partial St %>
+					<a href="#" on-click="@this.parent.toggleED(this),false"><%% this.Status %%></a>
+				<%= /partial %>
+				<%= #partial Act %>
+					<a href="#" on-click="@this.parent.Edit(this),false"><button class="btn btn-xs btn-info boxMe btnFnt">Edit</button></a>
+				<%= /partial %>
+			</datatable>
+		<%= /if %>
+	</script>
+{% endblock %}
+{% block ractive_js %} 
+	<script id="iPageJS" type="text/javascript">
+		$(function(){
+		
+		
+			socketIO.onmessage=function(event){
+				var data =JSON.parse(event['data'])
+				if(data.hasOwnProperty('enc')){
+					/*
+						
+					*/
+					enc=data['enc']
+					/*
+					Next is request for the Current User CU
+					*/
+					socketIO.send(CryptoJS.AES.encrypt(JSON.stringify({'id':'{{ theUser.id }}','target':'CU'}),enc))
+					/*
+						Get Counts for Total/Enabled/Disabled/Deleted
+					*/
+					socketIO.send(CryptoJS.AES.encrypt(JSON.stringify({'id':'{{ theUser.id }}','target':'CNTS'}),enc))
+				}else if (data.hasOwnProperty('CU')){
+					var CU=JSON.parse(CryptoJS.AES.decrypt(data['CU'],enc).toString(CryptoJS.enc.Utf8))
+					CU['createdAt']=moment(CU['createdAt']['$date'],'x').toString() || moment()
+					CU['updatedAt']=moment(CU['updatedAt']['$date'],'x').toString() || moment()
+					navBarBrand.set('CU',CU)
+				}else if(data.hasOwnProperty('CNTS')){
+					var Counts=JSON.parse(CryptoJS.AES.decrypt(data['CNTS'],enc).toString(CryptoJS.enc.Utf8))
+					internalLinks.set('Counts',Counts)
+				}else if(data.hasOwnProperty('DLRS')){
+					var theList=JSON.parse(CryptoJS.AES.decrypt(data['DLRS'],enc).toString(CryptoJS.enc.Utf8))
+					/*
+						Now We Set the content of the List 
+					*/
+					var myList=_.map(theList,function(item){
+						var Status='<button class="btn btn-success btnMe btn-xs boxMe btnFnt">Enabled</button>'
+						if (item['Enabled']==true){
+							Status='<button class="btn btn-success btnMe btn-xs boxMe btnFnt">Enabled</button>'
+						}else if(item['Enabled'] == false && item['Deleted'] == true){
+							Status="<button class='btn btn-danger btnMe btn-xs boxMe btnFnt'>Deleted</button>"
+						}else if(item['Enabled'] == false && item['Deleted'] == false){
+							Status="<button class='btn btn-danger btnMe btn-xs boxMe btnFnt'>Disabled</button>"
+						}
+						return {
+							'Name':item.firstName +' '+item.lastName,
+							'CreatedAt':moment(item.createdAt.$date).toString(),
+							'_id':item._id,
+							'lgnName':item.lgnName,
+							'Status':Status,
+							'Enabled':item.Enabled
+						}
+					})
+					bodyContent.set('theList',myList)
+					console.log('Enabling The List')
+					console.log(theList)
+					
+				}
+			}
+			var navBarBrand = new Ractive({
+				delimiters:['<%=','%>'],
+				tripleDelimiters:['<%%','%%>'],
+				template:"#NavBarBrandTpl",
+				el:'#NavBarBrand',
+				data: {
+					CU:{},
+					
+				}
+			})
+			var internalLinks = new Ractive({
+				delimiters:['<%=','%>'],
+				tripleDelimiters:['<%%','%%>'],
+				template:"#internalLinksTpl",
+				el:'#internalLinks',
+				data :{
+					Counts:{
+						All:0,
+						Ena:0,
+						Dis:0,
+						Del:0
+					}
+				},
+				listDealers : function(W){
+					socketIO.send(CryptoJS.AES.encrypt(JSON.stringify({'target':'DLRS','id':'{{theUser.id}}','type':W}),enc))
+					bodyContent.set('show',W)
+				}
+			})
+			var bodyContent = new Ractive({
+				delimiters:['<%=','%>'],
+				tripleDelimiters:['<%%','%%>'],
+				template:"#HtmlBodyContentTpl",
+				el:"HtmlBodyContent",
+				components:{
+					datatable:RactiveDatatable,
+				},
+				data :{
+					theList :	[],
+					show	: 	false,
+				},
+				computed: {
+					columns	:	function(){
+							return {
+							'Name':{},
+							'lgnName':{header:'UserName'},
+							'CreatedAt':{header:'Created At'},
+							'St':{header:'Status'},
+							'id':{display:false},
+							'Enabled':{display:false},
+							'Act':{}
+							}
+					}
+				},
+				Edit:function(Who){
+					console.log(Who)
+				},
+				toggleED:function(Who){
+					console.log(Who)
+				}
+			})
+		})
+	</script>
+{% endblock %}

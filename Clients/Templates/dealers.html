@@ -282,7 +282,14 @@ Welcome {{ theUser.firstName }} {{ theUser.lastName }}
 																	<a href="#" on-click="@this.parent.RemovePlan(this),false"><button class="btn btn-xs btn-danger boxMe btnFnt">Remove</button></a>
 																<%= /partial %>
 															</datatable>
-															<div class="">
+															<div class="col-md-4 col-md-offset-4">
+																<%= #if PlansForUser %>
+																	<button class="btn btn-primary btn-xs boxMe" on-click="@this.savePlans(),false">Save Plans</button>
+																<%= else %>
+																	<div class="alert alert-danger" role="danger">
+																		No Plans Enabled for this Dealer
+																	</div>
+																<%= /if %>
 															</div>
 														</div>
 														<div class="tab-pane fade" id="ClientsEdit">
@@ -394,6 +401,18 @@ Welcome {{ theUser.firstName }} {{ theUser.lastName }}
 					//console.log("All Plans ",thePlans,PlansForUser,EnabledUser,EnabledPlansForUser)
 					bodyContent.set('PlansForUser',PlansForUser)
 					
+				}else if (data.hasOwnProperty('dealerUPDT')){
+					var verdict=JSON.parse(CryptoJS.AES.decrypt(data['dealerUPDT'],enc).toString(CryptoJS.enc.Utf8))
+					if (verdict.hasOwnProperty('Success')) {
+						bodyContent.set('EditSuccess',"Record Updated Successfully ")
+						var W=bodyContent.get('show')
+						socketIO.send(CryptoJS.AES.encrypt(JSON.stringify({'target':'DLRS','id':'{{theUser.id}}','type':W}),enc))
+						socketIO.send(CryptoJS.AES.encrypt(JSON.stringify({'id':'{{ theUser.id }}','target':'CNTS'}),enc))
+					}else {
+						/* ToDo
+							Continue With Error MSG verdict from the server to display the Error.
+						*/
+					}
 				}
 			}
 			var navBarBrand = new Ractive({
@@ -553,6 +572,7 @@ Welcome {{ theUser.firstName }} {{ theUser.lastName }}
 					*/
 					var myThis=this;
 					var Who=myThis.get('Edit')
+					myThis.set('EditSuccess',false)
 					myThis.set('EditErr',false)
 					if (What=='Reset'){
 						console.log('Editdmin => Resetting ...')
@@ -572,12 +592,42 @@ Welcome {{ theUser.firstName }} {{ theUser.lastName }}
 							}else{
 								EditErr+="<a href='#PassWord'>Password</a> Must be specified<br>"
 							}
-							myThis.set('EditErr',EditErr)
+						}
+						if(EditErr==false){
 							/*
-								Continue Here
+								No Errors then We continue.
+								Here we should be sending the Who as encrypted data back to the system.
+								and listen to reply from the server.
 							*/
+							var Data2Send={
+								'id':'{{ theUser.id }}',
+								'target':'USRUPT',
+								'Who':Who['_id']['$oid'],
+								'data':Who
+							}
+							var Data2SendJS=JSON.stringify(Data2Send)
+							var Data2SendEnc=CryptoJS.AES.encrypt(Data2SendJS,enc)
+							socketIO.send(Data2SendEnc)
+						}else{
+							myThis.set('EditErr',EditErr)
 						}
 					}
+				},
+				savePlans:function(){
+					/*
+					 Saving Plans for the current Selected Dealer.
+					 1- Get DealerID (Who)
+					 2- Get a list of plans that has been enabled for this dealer
+						PlansForUser
+					*/
+					var myThis=this
+					var Who=myThis.get('Edit')
+					var PlansForUser=myThis.get('PlansForUser')
+					console.log('Populating For ',Who['_id']['$oid'], 'Plan List Of ',PlansForUser)
+					/*
+						ToDo
+						Send the data in encrypted channel to update the current User with the list of plans 
+					*/
 				}
 			})
 		})

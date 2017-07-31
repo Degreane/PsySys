@@ -143,6 +143,44 @@ def connectedChannel(message):
 		message.reply_channel.send({
 		        'text':json.dumps({'AllPlans':encryptedMSG})
 		})
+	if messageJSON['target'] == 'USRUPT' :
+		print(" Updating A User Of ID :({})".format(messageJSON['Who']))
+		currentDealer=copy.deepcopy(messageJSON['data'])
+		#get the currentDealerID to change
+		dealerID=messageJSON['Who']
+		
+		#check for lgnName if exists.
+		#
+		lgnNameQuery=Q(lgnName=currentDealer['lgnName'])
+		idQuery=Q(_id=dealerID)
+		lgnNameFetch=user.objects(lgnNameQuery)
+		if lgnNameFetch.count() > 0 :
+			# if we have a lgnNameFetch Count >0 then we check for associated _id
+			theID=lgnNameFetch[0]['id']
+			if str(theID) == str(dealerID) :
+				# we proceed with Updates
+				#print("Matched ID continue")
+				if currentDealer.has_key('_id') :
+					del currentDealer['_id']
+				currentDealer['updatedAt']=datetime.datetime.now()
+				if currentDealer.has_key('InternalId') :
+					del currentDealer['InternalId']
+				if currentDealer.has_key('createdAt') :
+					del currentDealer['createdAt']
+				theDBDealer=user.objects(idQuery)
+				user.objects(id=dealerID).update(**currentDealer)
+				encryptedMSG=b64encode(encrypt(json.dumps({'Success':True}),encKey))
+				message.reply_channel.send({
+				        'text':json.dumps({'dealerUPDT':encryptedMSG})
+				})
+			else:
+				# we should issue an error back 
+				print("duplicate lgnName Error")
+				# ToDo
+				# Continue submitting Error from the server to the web browser.
+				
+				
+		
 	
 @channel_and_http_session
 def connectChannelid(message):

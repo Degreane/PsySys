@@ -179,7 +179,9 @@ def connectedChannel(message):
 				# ToDo
 				# Continue submitting Error from the server to the web browser.
 				
-				
+	if messageJSON['target'] == 'USRUPDTPLAN':
+		# ToDo Allow Updating Plans Here 
+		pass
 		
 	
 @channel_and_http_session

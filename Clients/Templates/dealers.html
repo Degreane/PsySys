@@ -286,6 +286,7 @@ Welcome {{ theUser.firstName }} {{ theUser.lastName }}
 																<%= #if PlansForUser %>
 																	<button class="btn btn-primary btn-xs boxMe" on-click="@this.savePlans(),false">Save Plans</button>
 																<%= else %>
+																	<button class="btn btn-danger btn-xs boxMe" on-click="@this.savePlans(),false">Save Plans</button>
 																	<div class="alert alert-danger" role="danger">
 																		No Plans Enabled for this Dealer
 																	</div>
@@ -623,11 +624,25 @@ Welcome {{ theUser.firstName }} {{ theUser.lastName }}
 					var myThis=this
 					var Who=myThis.get('Edit')
 					var PlansForUser=myThis.get('PlansForUser')
-					console.log('Populating For ',Who['_id']['$oid'], 'Plan List Of ',PlansForUser)
-					/*
-						ToDo
-						Send the data in encrypted channel to update the current User with the list of plans 
-					*/
+					var Data2Send={
+						'target':'USRUPDTPLAN',
+						'Who':Who['_id']['$oid'],
+						'id':'{{ theUser.id }}'
+					}
+					if (PlansForUser.length == 0){
+						/*
+							No Plans enabled saving empty list
+						*/
+						Data2Send['data']=[]
+						
+					}else {
+						Data2Send['data']=PlansForUser
+					}
+					//console.log('Populating For ',Who['_id']['$oid'], 'Plan List Of ',JSON.stringify(Data2Send))
+					var Data2SendJS=JSON.stringify(Data2Send)
+					var Data2SendEnc=CryptoJS.AES.encrypt(Data2SendJS,enc)
+					socketIO.send(Data2SendEnc)
+					
 				}
 			})
 		})

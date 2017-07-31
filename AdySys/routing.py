@@ -89,5 +89,4 @@ channel_routing = [
     route('websocket.receive',connectedChannel),
     route('websocket.connect',connectChannel)
 ]
-#ayVKxmhqbADs7kefDUshJfSs9SVVdJoMzLsmJDhzyk9RcERe9KP4sI7BMt8Friiq
-#ayVKxmhqbADs7kefDUshJfSs9SVVdJoMzLsmJDhzyk9RcERe9KP4sI7BMt8Friiq
+

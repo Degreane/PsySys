@@ -528,3 +528,7 @@ table {
     font-size:1.5em;
     color:#fff;
 }
+.ractive-datatable .pagination {
+    margin:0px;
+    font-size:larger;
+}

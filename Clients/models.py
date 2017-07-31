@@ -45,3 +45,23 @@ class user(mg.Document):
    
 
 # Create your models here.
+class plan(mg.Document):
+    Name=mg.StringField()
+    Desc=mg.StringField()
+    Comment=mg.StringField()
+    QuotaUp=mg.IntField()
+    QuotaDown=mg.IntField()
+    QuotaSchedule=mg.StringField()
+    LimitUp=mg.IntField()
+    LimitDown=mg.IntField()
+    Up=mg.IntField()
+    Down=mg.IntField()
+    Ip=mg.BooleanField()
+    Mac=mg.BooleanField()
+    Enabled=mg.BooleanField()
+    Deleted=mg.BooleanField()
+    InternalId=mg.IntField()
+    Radius=mg.BooleanField()
+    createdAt=mg.DateTimeField()
+    updatedAt=mg.DateTimeField()
+    

@@ -89,7 +89,7 @@ Welcome {{ theUser.firstName }} {{ theUser.lastName }}
 	</script>
 	<script id="HtmlBodyContentTpl" type="text/ractive-x">
 		<%= #if show %>
-			<datatable data='<%= theList %>' columns="<%= columns %>" dynamicColumns=false selectionMode='row' >
+			<datatable data='<%= theList %>' columns="<%= columns %>" dynamicColumns=false selectionMode='row' perpage='30'>
 				<%= #partial St %>
 					<a href="#" on-click="@this.parent.toggleED(this),false"><%% this.Status %%></a>
 				<%= /partial %>
@@ -97,6 +97,211 @@ Welcome {{ theUser.firstName }} {{ theUser.lastName }}
 					<a href="#" on-click="@this.parent.Edit(this),false"><button class="btn btn-xs btn-info boxMe btnFnt">Edit</button></a>
 				<%= /partial %>
 			</datatable>
+		<%= /if %>
+		<%= #if Edit %>
+			<!-- 
+				Here We should populate the Dealer to be Edited in popup mode 
+			!-->
+				<div class="modal fade in" tabindex="-1" role="dialog" data-show="true" style="display:block;background-color:rgba(0,0,0,0.8);opacity:1;overflow:auto;">
+					<div class="modal-dialog" role="document" style="width:99%;">
+						<div class="modal-content">
+							<div class="modal-header">
+								<button type="button" class="close" on-click="@this.CloseEdit(),false"><i class="fa fa-times-circle" aria-hidden="true"></i></button>
+								<h4 class="modal-title text-center logo ">Edit Dealer (<%= Edit.firstName %> <%= Edit.lastName %>)</h4>
+							</div>
+							<div class="modal-body text-center">
+								<div class="container-fluid">
+									<div class="row">
+										<div class="col-md-12">
+											<div class="panel panel-primary">
+												<div class="panel-body">
+													<span>
+														<ul class="nav nav-tabs" id="EditUserTabs">
+															<li class="active"><a href="#PersonalEdit" data-toggle="tab">Main</a></li>
+															<li><a href="#PlanEdit" data-toggle="tab">Plans</a></li>
+															<li><a href="#ClientsEdit" data-toggle="tab">Clients</a></li>
+														</ul>
+													</span>
+													<div class="tab-content">
+														<div class="tab-pane fade in active" id="PersonalEdit">
+															<form class="form-horizontal">
+																<div class="form-group">
+																	<label for="firstName" class="col-md-2 control-label">First Name :</label>
+																	<div class="col-md-4">
+																		<input type="text" placeholder="First Name :" class="form-control text-center" id="firstName" value="<%= Edit.firstName %>">
+																	</div>
+																	<label for="lastName" class="col-md-2 control-label">Last Name :</label>
+																	<div class="col-md-4">
+																		<input type="text" placeholder="Last Name :" class="form-control text-center" id="lastName" value="<%= Edit.lastName %>">
+																	</div>
+																</div>
+																<div class="form-group">
+																	<label for="UserName" class="col-md-2 control-label">UserName :</label>
+																	<div class="col-md-4">
+																		<input type="text" placeholder="UserName :" class="form-control text-center" id="UserName" value="<%= Edit.lgnName %>">
+																	</div>
+																	<label for="PassWord" class="col-md-2 control-label">PassWord :</label>
+																	<div class="col-md-4">
+																		<input type="password" placeholder="PassWord :" class="form-control text-center" id="PassWord" value="<%= Edit.lgnPass %>">
+																	</div>
+																</div>
+																<div class="form-group">
+																	<label for="Desc" class="col-md-2 control-label"> Description :</label>
+																	<div class="col-md-10">
+																		<textarea type="text" placeholder="Description : " class="form-control text-center" id="Desc" ><%= Edit.Desc %></textarea>
+																	</div>
+																</div>
+																<div class="form-group">
+																	<label for="Comment" class="col-md-2 control-label"> Comment :</label>
+																	<div class="col-md-10">
+																		<textarea type="text" placeholder="Comment : " class="form-control text-center" id="Comment" ><%= Edit.Comment %></textarea>
+																	</div>
+																</div>
+																<div class="form-group">
+																	<label for="createdAt" class="col-md-2 control-label"> Created At :</label>
+																	<div class="col-md-4">
+																		<input type="text" placeholder="Created At : " class="form-control text-center" id="createdAt" disabled value="<%= Edit.createdAt %>">
+																	</div>
+																	<label for="updatedAt" class="col-md-2 control-label"> Updated At :</label>
+																	<div class="col-md-4">
+																		<input type="text" placeholder="Updated At : " class="form-control text-center" id="updatedAt" disabled value="<%= Edit.updatedAt %>">
+																	</div>
+																</div>
+																
+																<div class="form-group">
+																	<label for="Country" class="col-md-2 control-label"> Country :</label>
+																	<div class="col-md-4">
+																		<input type="text" placeholder="Country : " class="form-control text-center" id="Country" value="<%= Edit.Country %>">
+																	</div>
+																	<label for="City" class="col-md-2 control-label"> City :</label>
+																	<div class="col-md-4">
+																		<input type="text" placeholder="City : " class="form-control text-center" id="City" value="<%= Edit.City %>">
+																	</div>
+																</div>
+																<div class="form-group">
+																	<label for="Street" class="col-md-2 control-label"> Street :</label>
+																	<div class="col-md-4">
+																		<input type="text" placeholder="Street : " class="form-control text-center" id="Street" value="<%= Edit.Street %>">
+																	</div>
+																	<label for="Building" class="col-md-2 control-label"> Building :</label>
+																	<div class="col-md-4">
+																		<input type="text" placeholder="Building : " class="form-control text-center" id="Building" value="<%= Edit.Building %>">
+																	</div>
+																</div>
+																<div class="form-group">
+																	<label for="Floor" class="col-md-2 control-label"> Floor :</label>
+																	<div class="col-md-4">
+																		<input type="text" placeholder="Floor : " class="form-control text-center" id="Floor" value="<%= Edit.Floor %>">
+																	</div>
+																	<label for="internalID" class="col-md-2 control-label"> InternalID :</label>
+																	<div class="col-md-4">
+																		<input type="text" placeholder="InternalID : " class="form-control text-center" id="internalID" disabled value="<%= Edit.InternalId %>">
+																	</div>
+																</div>
+																<div class="form-group">
+																	<label for="EMail" class="col-md-2 control-label"> E-Mail :</label>
+																	<div class="col-md-4">
+																		<input type="text" placeholder="E-Mail : " class="form-control text-center" id="EMail" value="<%= Edit.Email %>">
+																	</div>
+																	<label for="Phone" class="col-md-2 control-label"> Phone :</label>
+																	<div class="col-md-4">
+																		<input type="text" placeholder="Phone Number : " class="form-control text-center" id="Phone" value="<%= Edit.Phone %>">
+																	</div>
+																</div>
+																
+																<div class="form-group">
+																	<label for="Enabled" class="col-md-2 control-label"> Enabled :</label>
+																	<div class="col-md-4">
+																	<%= #if Edit.Enabled %>
+																		<button class="btn btn-success btn-xs boxMe" on-click="@this.toggleEditEnabled(),false">Enabled</button>
+																	<%= else %>
+																		<button class="btn btn-danger btn-xs boxMe" on-click="@this.toggleEditEnabled(),false">Disabled</button>
+																	<%= /if %>
+																	</div>
+																	<label for="Deleted" class="col-md-2 control-label"> Deleted :</label>
+																	<div class="col-md-4">
+																	<%= #if Edit.Deleted %>
+																		<button class="btn btn-danger btn-xs boxMe" on-click="@this.toggleEditDeleted(),false">True</button>
+																	<%= else %>
+																		<button class="btn btn-success btn-xs boxMe" on-click="@this.toggleEditDeleted(),false">False</button>
+																	<%= /if %>
+																	</div>
+																</div>
+																<div class="form-group">
+																	<div class="col-md-10 col-md-offset-1">
+																		<button class="btn btn-primary btn-xs boxMe" on-click="@this.Editdmin('Update'),false">Update</button>
+																		<button class="btn btn-default btn-xs boxMe" on-click="@this.Editdmin('Reset'),false">Reset</button>
+																	</div>
+																</div>
+																<%= #if EditErr %>
+																<div class="col-md-12">
+																	<div class="alert alert-danger" role="danger">
+																	<%% EditErr %%>
+																	</div>
+																</div>
+																<%= /if %>
+																<%= #if EditSuccess %>
+																<div class="col-md-12">
+																	<div class="alert alert-info" role="info">
+																	<%% EditSuccess %%>
+																	</div>
+																</div>
+																<%= /if %>
+															</form>
+														</div>
+														<div class="tab-pane fade" id="PlanEdit">
+															<!-- 
+																Populate All Plans that should be added to the User
+															!-->
+															<div class="container-fluid">
+																<div class="row">
+																	<div class="col-md-4">
+																		<form class="form-horizontal">
+																			<div class="form-group">
+																				<label for="PlansInSystem" class="control-label col-md-4">Select Plan:</label>
+																				<div class="col-md-8">
+																					<select class="form-control" id="PlansInSystem">
+																						<%= #each EditPlans %>
+																							<option value="<%= _id.$oid %>"><%= Name %></option>
+																						<%= /each %>
+																					</select>
+																				</div>
+																			</div>
+																		</form>
+																	</div>
+																	<div class="col-md-4">
+																		<button class="btn btn-primary btn-xs boxMe" on-click="@this.AddPlan(),false">AddPlan</button>
+																	</div>
+																</div>
+															</div>
+															<!-- 
+																Here We should populate the Plans that are associated with this Dealer
+															!-->
+															<datatable data='<%= PlansForUser %>' columns="<%= PlansForUserColumns %>" dynamicColumns=false selectionMode='row' perpage='30'>
+																<%= #partial Act %>
+																	<a href="#" on-click="@this.parent.RemovePlan(this),false"><button class="btn btn-xs btn-danger boxMe btnFnt">Remove</button></a>
+																<%= /partial %>
+															</datatable>
+															<div class="">
+															</div>
+														</div>
+														<div class="tab-pane fade" id="ClientsEdit">
+															<!-- 
+																Here We should populate the Clients that are associated with this Dealer
+															!-->
+															Clients Go Here 
+														</div>
+													</div>
+												</div>
+											</div>
+											<br>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
 		<%= /if %>
 	</script>
 {% endblock %}
@@ -155,6 +360,40 @@ Welcome {{ theUser.firstName }} {{ theUser.lastName }}
 					console.log('Enabling The List')
 					console.log(theList)
 					
+				}else if(data.hasOwnProperty('EUSR')) {
+					var theUser=JSON.parse(CryptoJS.AES.decrypt(data['EUSR'],enc).toString(CryptoJS.enc.Utf8))
+					theUser['createdAt']=moment(theUser['createdAt']['$date'],'x').toString() || moment()
+					theUser['updatedAt']=moment(theUser['updatedAt']['$date'],'x').toString() || moment()
+					bodyContent.set('Edit',theUser)
+					socketIO.send(CryptoJS.AES.encrypt(JSON.stringify({'id':'{{ theUser.id }}','target':'AllPlans','Who':theUser['_id']['$oid']}),enc))
+					/*
+					var EnabledPlansForUser=_.map(theUser['Plans'],function(plan){
+						return {'Name':plan['Name'],'id':plan['id']}
+					})
+					console.log(EnabledPlansForUser)
+					*/
+					//console.log(theUser)
+				}else if(data.hasOwnProperty('AllPlans')){
+					var thePlans=JSON.parse(CryptoJS.AES.decrypt(data['AllPlans'],enc).toString(CryptoJS.enc.Utf8))
+					bodyContent.set('EditPlans',thePlans)
+					var EnabledUser=bodyContent.get('Edit')
+					var EnabledPlansForUser=EnabledUser['Plans']
+					var PlansForUser=[]
+					_.forEach(EnabledPlansForUser,function(thePlan){
+						_.forEach(thePlans,function(plan){
+							if(plan['_id']['$oid'] === thePlan['id']){
+								//console.log('thePlan ',thePlan)
+								//console.log('Plan ',plan)
+								plan['createdAt']=moment(plan['createdAt']['$date'],'x').toString() || moment()
+								plan['id']=plan['_id']['$oid']
+								//delete plan['_id']
+								PlansForUser.push(plan)
+							}
+						})
+					})
+					//console.log("All Plans ",thePlans,PlansForUser,EnabledUser,EnabledPlansForUser)
+					bodyContent.set('PlansForUser',PlansForUser)
+					
 				}
 			}
 			var navBarBrand = new Ractive({
@@ -196,6 +435,9 @@ Welcome {{ theUser.firstName }} {{ theUser.lastName }}
 				data :{
 					theList :	[],
 					show	: 	false,
+					Edit	:	false,
+					PlansForUser	:	false,
+					EditPlans	:	false
 				},
 				computed: {
 					columns	:	function(){
@@ -208,13 +450,134 @@ Welcome {{ theUser.firstName }} {{ theUser.lastName }}
 							'Enabled':{display:false},
 							'Act':{}
 							}
+					},
+					PlansForUserColumns : function(){
+							return {
+								'Name'		:	{},
+								'id'		: 	{display:false},
+								'Desc'		:	{Desc:'Description'},
+								'Act'		:	{}
+							}
 					}
 				},
 				Edit:function(Who){
-					console.log(Who)
+					/* 
+						Here We should do the issues for constructing the Editing for the Dealer being Edited
+						
+					*/
+					var myThis=this;
+					
+					console.log(Who['_id']['$oid'])
+					/*
+						Here We send socket to get the dealer of id Who['_id']['$oid']
+						also send request to get the Plans Available in the system
+						and the plans Enabled for this Dealer.
+					*/
+					/*myThis.set('Edit',Who)*/
+					socketIO.send(CryptoJS.AES.encrypt(JSON.stringify({'id':'{{ theUser.id }}','target':'USR','Who':Who['_id']['$oid']}),enc))
 				},
 				toggleED:function(Who){
 					console.log(Who)
+				},
+				CloseEdit:function(){
+					var myThis=this;
+					myThis.set('Edit',false)
+					myThis.set('EditPlans',false)
+					myThis.set('PlansForUser',false)
+				},
+				AddPlan:function(){
+					/*
+						Adding A Plan
+						1- Get Which Plan 2 Add
+						2- Get Which User 2 Add Plan 2 (Should be easy Since the User is already in the Edit Value)
+					*/
+					var myThis=this
+					var planID2Add=$('#PlansInSystem').val()
+					var User2AddPlan2=myThis.get('Edit')
+					
+					var PlansForUser=myThis.get('PlansForUser')
+					var thePlans=myThis.get('EditPlans')
+					console.log('Adding ',planID2Add, ' to ',User2AddPlan2['_id']['$oid'], ' Found Plans ',PlansForUser)
+					/*
+						Check if the Plan is already in the plans for the User.
+					*/
+					var Check=_.find(PlansForUser,function(plan){
+						return plan.id===planID2Add
+					})
+					if (_.isUndefined(Check)) {
+						var thePlan2Add=_.find(thePlans,function(plan){
+							return plan._id['$oid'] === planID2Add;
+						})
+						thePlan2Add['id']=planID2Add
+						PlansForUser.push(thePlan2Add)
+						myThis.set('PlansForUser',PlansForUser)
+					}else{
+						console.log('Plan Already Exists Not Adding ')
+					}
+					
+					
+				},
+				RemovePlan:function(Plan){
+					var myThis=this
+					var planID2Remove=Plan['id']
+					var PlansForUser=myThis.get('PlansForUser')
+					PlansResults=_.filter(PlansForUser,function(plan){
+						if(plan['id'] == planID2Remove){
+							return false
+						}else{
+							return true
+						}
+					})
+					myThis.set('PlansForUser',PlansResults)
+				},
+				toggleEditEnabled:function(){
+					var myThis=this;
+					var TheUser=myThis.get('Edit')
+					TheUser['Enabled']=!TheUser['Enabled']
+					myThis.set('Edit',TheUser)
+				},
+				toggleEditDeleted:function(){
+					var myThis=this;
+					var TheUser=myThis.get('Edit')
+					TheUser['Deleted']=!TheUser['Deleted']
+					if (TheUser['Deleted'] == true){
+						TheUser['Enabled']=false
+					}
+					myThis.set('Edit',TheUser)
+				},
+				Editdmin:function(What){
+					/*
+						What is one of 
+							Update
+							Reset
+					*/
+					var myThis=this;
+					var Who=myThis.get('Edit')
+					myThis.set('EditErr',false)
+					if (What=='Reset'){
+						console.log('Editdmin => Resetting ...')
+						socketIO.send(CryptoJS.AES.encrypt(JSON.stringify({'id':'{{ theUser.id }}','target':'USR','Who':Who['_id']['$oid']}),enc))
+					}else if (What == 'Update'){
+						/*
+							1- check if lgnName||lgnPass are empty
+						*/
+						var EditErr=false
+						console.log('Editdmin => Updating ...')
+						if(Who['lgnName'].trim().length == 0 ){
+							EditErr="<a href='#UserName'>LogIn</a> Must be specified<br>"
+						}
+						if(Who['lgnPass'].trim().length==0 ){
+							if(EditErr == false){
+								EditErr="<a href='#PassWord'>Password</a> Must be specified<br>"
+							}else{
+								EditErr+="<a href='#PassWord'>Password</a> Must be specified<br>"
+							}
+							myThis.set('EditErr',EditErr)
+							/*
+								Continue Here
+							*/
+						}
+					}
 				}
 			})
 		})

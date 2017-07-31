@@ -15,7 +15,11 @@ from Crypto.Cipher import AES
 from random import choice
 from base64 import b64encode,b64decode
 from models import user
+from models import plan
 from mongoengine.queryset import Q
+
+
+
 
 def derive_key_and_iv(password, salt, key_length, iv_length):
 	d = d_i = ''
@@ -121,6 +125,23 @@ def connectedChannel(message):
 		encryptedMSG=b64encode(encrypt(theList.to_json(),encKey))
 		message.reply_channel.send({
 		        'text':json.dumps({'DLRS':encryptedMSG})
+		})
+	if messageJSON['target'] == 'USR':
+		#pp.pprint(messageJSON['Who'])
+		QQuery=Q(isDealer=True) & Q(id=messageJSON['Who'])
+		theUser=user.objects(QQuery)
+		#pp.pprint(theUser[0].to_json())
+		encryptedMSG=b64encode(encrypt(theUser[0].to_json(),encKey))
+		message.reply_channel.send({
+		        'text':json.dumps({'EUSR':encryptedMSG})
+		})
+	if messageJSON['target'] == 'AllPlans':
+		print("Getting All Plans Here As Should be returned ")
+		QQuery=Q(Enabled=True) & Q(Deleted=False)
+		thePlans=plan.objects(QQuery)
+		encryptedMSG=b64encode(encrypt(thePlans.to_json(),encKey))
+		message.reply_channel.send({
+		        'text':json.dumps({'AllPlans':encryptedMSG})
 		})
 	
 @channel_and_http_session

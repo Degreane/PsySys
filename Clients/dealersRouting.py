@@ -181,7 +181,16 @@ def connectedChannel(message):
 				
 	if messageJSON['target'] == 'USRUPDTPLAN':
 		# ToDo Allow Updating Plans Here 
-		pass
+		#print("The Data {}".format(messageJSON['data']))
+		dealerID=messageJSON['Who']
+		print("The ID To Be Fetched is {}".format(dealerID))
+		idQuery=Q(id=dealerID)
+		idFetch=user.objects(idQuery)
+		print(" The ID Fetched is {} {}".format(idFetch[0],messageJSON['data']))
+		if idFetch.count() > 0:
+			currentUpdate=copy.deepcopy(messageJSON['data'])
+			user.objects(id=dealerID).update(**currentUpdate)
+		
 		
 	
 @channel_and_http_session

@@ -383,6 +383,10 @@ Welcome {{ theUser.firstName }} {{ theUser.lastName }}
 					//console.log(theUser)
 				}else if(data.hasOwnProperty('AllPlans')){
 					var thePlans=JSON.parse(CryptoJS.AES.decrypt(data['AllPlans'],enc).toString(CryptoJS.enc.Utf8))
+					_.forEach(thePlans,function(plan){
+						plan['createdAt']=moment(plan['createdAt']['$date'],'x').toString() || moment()
+						plan['updatedAt']=moment(plan['updatedAt']['$date'],'x').toString() || moment()
+					})
 					bodyContent.set('EditPlans',thePlans)
 					var EnabledUser=bodyContent.get('Edit')
 					var EnabledPlansForUser=EnabledUser['Plans']
@@ -393,6 +397,7 @@ Welcome {{ theUser.firstName }} {{ theUser.lastName }}
 								//console.log('thePlan ',thePlan)
 								//console.log('Plan ',plan)
 								plan['createdAt']=moment(plan['createdAt']['$date'],'x').toString() || moment()
+								plan['updatedAt']=moment(plan['updatedAt']['$date'],'x').toString() || moment()
 								plan['id']=plan['_id']['$oid']
 								//delete plan['_id']
 								PlansForUser.push(plan)
@@ -633,16 +638,19 @@ Welcome {{ theUser.firstName }} {{ theUser.lastName }}
 						/*
 							No Plans enabled saving empty list
 						*/
-						Data2Send['data']=[]
+						Data2Send['data']={'Plans':[]}
 						
 					}else {
-						Data2Send['data']=PlansForUser
+						_.forEach(PlansForUser,function(plan){
+							delete plan['_id']
+						})
+						Data2Send['data']={'Plans':PlansForUser}
 					}
-					//console.log('Populating For ',Who['_id']['$oid'], 'Plan List Of ',JSON.stringify(Data2Send))
+					
+					console.log('Populating For ',Who['_id']['$oid'], 'Plan List Of ',JSON.stringify(Data2Send))
 					var Data2SendJS=JSON.stringify(Data2Send)
 					var Data2SendEnc=CryptoJS.AES.encrypt(Data2SendJS,enc)
 					socketIO.send(Data2SendEnc)
-					
 				}
 			})
 		})

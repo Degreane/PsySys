@@ -193,12 +193,12 @@ def connectedChannel(message):
 		
 	if messageJSON['target'] == 'USRGETCLIENTS':
 		'''
-		ToDo Pick clients of Owner= 'Who'
+		Done Pick clients of Owner= 'Who'
 		'''
 		dealerID=messageJSON['Who']
 		clientsQuery=(Q(Owner=dealerID) &Q(isClient=True))
 		TheClients=user.objects(clientsQuery)
-		print("No. Of Clients For the User is {}".format(TheClients.count()))
+		#print("No. Of Clients For the User is {}".format(TheClients.count()))
 		'''
 		Check if count is > 0
 		'''
@@ -214,6 +214,23 @@ def connectedChannel(message):
 			encryptedMSG=b64encode(encrypt(json.dumps({'NoOfClients':0}),encKey))
 			message.reply_channel.send({
 			        'text':json.dumps({'USRGOTNOCLIENTS':encryptedMSG})
+			})
+	if messageJSON['target'] == 'USRGETCLIENT':
+		'''
+		Done Pick Client of ID
+		'''
+		clientID=messageJSON['Who']
+		ClientQuery=(Q(pk=clientID) & Q(isClient=True))
+		theClient=user.objects(ClientQuery)
+		if theClient.count() == 1:
+			encryptedMSG=b64encode(encrypt(theClient[0].to_json(),encKey))
+			message.reply_channel.send({
+			        'text':json.dumps({'USRGOTCLIENT':encryptedMSG})
+			})
+		else :
+			encryptedMSG=b64encode(encrypt(json.dumps({'NoOfClients':theClient.count()}),encKey))
+			message.reply_channel.send({
+			        'text':json.dumps({'USRGOTNoCLIENT':encryptedMSG})
 			})
 	
 @channel_and_http_session

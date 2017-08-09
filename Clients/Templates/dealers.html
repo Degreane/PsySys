@@ -120,6 +120,9 @@ Welcome {{ theUser.firstName }} {{ theUser.lastName }}
 															<li class="active"><a href="#PersonalEdit" data-toggle="tab">Main</a></li>
 															<li><a href="#PlanEdit" data-toggle="tab">Plans</a></li>
 															<li><a href="#ClientsEdit" data-toggle="tab" on-click="@this.fetchClients()">Clients</a></li>
+															<%= #if EditClient %>
+																<li><a href="#ClientEdit" data-toggle="tab" ><%= EditClient.firstName %> <%= EditClient.lastName %></a></li>
+															<%= /if %>
 														</ul>
 													</span>
 													<div class="tab-content">
@@ -299,10 +302,18 @@ Welcome {{ theUser.firstName }} {{ theUser.lastName }}
 																fetchClients above should bring all the clients that belongs to this dealer.
 															!-->
 															<%= #if Clients %>
-																<datatable data='<%= Clients %>' columns="ClientsColumnsConfig" dynamicColumns=false selectionMode='row' perpage='30'>
-																
+																<datatable data='<%= Clients %>' columns="<%= ClientsColumnsConfig %>" dynamicColumns=false selectionMode='row' perpage='30'>
+																	<%= #partial St %>
+																		<a href="#" on-click="@this.parent.toggleClientED(this),false"><%% this.Status %%></a>
+																	<%= /partial %>
+																	<%= #partial Act %>
+																		<a href="#" on-click="@this.parent.EditClient(this),false"><button class="btn btn-xs btn-info boxMe btnFnt">Edit</button></a>
+																	<%= /partial %>
 																</datatable>
 															<%= /if %>
+														</div>
+														<div class="tab-pane fade" id="ClientEdit">
+															
 														</div>
 													</div>
 												</div>
@@ -428,8 +439,32 @@ Welcome {{ theUser.firstName }} {{ theUser.lastName }}
 					/*
 						USRGOTCLIENTS should return the list of clients enabled for this dealer.
 					*/
-					var USRClients=JSON.parse(CryptoJS.AES.decrypt(data['USRGOTCLIENTS'],enc).toString(CryptoJS.enc.Utf8))
+					var USRClients=_.map(JSON.parse(CryptoJS.AES.decrypt(data['USRGOTCLIENTS'],enc).toString(CryptoJS.enc.Utf8)),function(item){
+						var Status='<button class="btn btn-success btnMe btn-xs boxMe btnFnt">Enabled</button>'
+						if (item['Enabled']==true){
+							Status='<button class="btn btn-success btnMe btn-xs boxMe btnFnt">Enabled</button>'
+						}else if(item['Enabled'] == false && item['Deleted'] == true){
+							Status="<button class='btn btn-danger btnMe btn-xs boxMe btnFnt'>Deleted</button>"
+						}else if(item['Enabled'] == false && item['Deleted'] == false){
+							Status="<button class='btn btn-danger btnMe btn-xs boxMe btnFnt'>Disabled</button>"
+						}
+						return {
+							'Name':item.firstName +' '+item.lastName,
+							'CreatedAt':moment(item.createdAt.$date).toString(),
+							'_id':item._id,
+							'lgnName':item.lgnName,
+							'Status':Status,
+							'Enabled':item.Enabled
+						}
+					})
+					//console.log(USRClients)
 					bodyContent.set('Clients',USRClients)
+				}else if(data.hasOwnProperty('USRGOTCLIENT')){
+					/*
+						USRGOTCLIENT should return a single record of the desired Client 
+					*/
+					//var TheClient=JSON.parse(CryptoJS.AES.decrypt(data['USRGOTCLIENT'],enc).toString(CryptoJS.enc.Utf8))
+					bodyContent.set('EditClient',JSON.parse(CryptoJS.AES.decrypt(data['USRGOTCLIENT'],enc).toString(CryptoJS.enc.Utf8)))
 				}
 			}
 			var navBarBrand = new Ractive({
@@ -469,12 +504,13 @@ Welcome {{ theUser.firstName }} {{ theUser.lastName }}
 					datatable:RactiveDatatable,
 				},
 				data :{
-					theList :	[],
-					show	: 	false,
-					Edit	:	false,
+					theList		:	[],
+					show		: 	false,
+					Edit		:	false,
 					PlansForUser	:	false,
 					EditPlans	:	false,
-					Clients		:	false
+					Clients		:	false,
+					EditClient	:	false
 				},
 				computed: {
 					columns	:	function(){
@@ -524,6 +560,14 @@ Welcome {{ theUser.firstName }} {{ theUser.lastName }}
 					*/
 					/*myThis.set('Edit',Who)*/
 					socketIO.send(CryptoJS.AES.encrypt(JSON.stringify({'id':'{{ theUser.id }}','target':'USR','Who':Who['_id']['$oid']}),enc))
+				},
+				EditClient:function(Who){
+					/*
+						Here We should issue a client Editing Procedure 
+						The Id to check is Who['_id'][$oid']
+					*/
+					socketIO.send(CryptoJS.AES.encrypt(JSON.stringify({'id':'{{ theUser.id }}','target':'USRGETCLIENT','Who':Who['_id']['$oid']}),enc))
+					
 				},
 				toggleED:function(Who){
 					console.log(Who)

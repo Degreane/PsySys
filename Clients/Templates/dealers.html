@@ -319,7 +319,116 @@ Welcome {{ theUser.firstName }} {{ theUser.lastName }}
 																	<h3 class="panel-title">Editing Client ( <span class="logo"><%= EditClient.firstName %> <%= EditClient.lastName %></span> )</h3>
 																</div>
 																<div class="panel-body">
-																	
+																	<form class="form-horizontal">
+																		<div class="form-group">
+																			<label for="firstName" class="col-md-2 control-label">First Name :</label>
+																			<div class="col-md-4">
+																				<input type="text" placeholder="First Name :" class="form-control text-center" id="firstName" value="<%= EditClient.firstName %>">
+																			</div>
+																			<label for="lastName" class="col-md-2 control-label">Last Name :</label>
+																			<div class="col-md-4">
+																				<input type="text" placeholder="Last Name :" class="form-control text-center" id="lastName" value="<%= EditClient.lastName %>">
+																			</div>
+																		</div>
+																		<div class="form-group">
+																			<label for="UserName" class="col-md-2 control-label">UserName :</label>
+																			<div class="col-md-4">
+																				<input type="text" placeholder="UserName :" class="form-control text-center" id="UserName" value="<%= EditClient.lgnName %>">
+																			</div>
+																			<label for="PassWord" class="col-md-2 control-label">PassWord :</label>
+																			<div class="col-md-4">
+																				<input type="password" placeholder="PassWord :" class="form-control text-center" id="PassWord" value="<%= EditClient.lgnPass %>">
+																			</div>
+																		</div>
+																		<div class="form-group">
+																			<label for="Desc" class="col-md-2 control-label"> Description :</label>
+																			<div class="col-md-10">
+																				<textarea type="text" placeholder="Description : " class="form-control text-center" id="Desc" ><%= EditClient.Desc %></textarea>
+																			</div>
+																		</div>
+																		<div class="form-group">
+																			<label for="Comment" class="col-md-2 control-label"> Comment :</label>
+																			<div class="col-md-10">
+																				<textarea type="text" placeholder="Comment : " class="form-control text-center" id="Comment" ><%= EditClient.Comment %></textarea>
+																			</div>
+																		</div>
+																		<div class="form-group">
+																			<label for="createdAt" class="col-md-2 control-label"> Created At :</label>
+																			<div class="col-md-4">
+																				<input type="text" placeholder="Created At : " class="form-control text-center" id="createdAt" disabled value="<%= EditClient.createdAt %>">
+																			</div>
+																			<label for="updatedAt" class="col-md-2 control-label"> Updated At :</label>
+																			<div class="col-md-4">
+																				<input type="text" placeholder="Updated At : " class="form-control text-center" id="updatedAt" disabled value="<%= EditClient.updatedAt %>">
+																			</div>
+																		</div>
+																		
+																		<div class="form-group">
+																			<label for="Country" class="col-md-2 control-label"> Country :</label>
+																			<div class="col-md-4">
+																				<input type="text" placeholder="Country : " class="form-control text-center" id="Country" value="<%= EditClient.Country %>">
+																			</div>
+																			<label for="City" class="col-md-2 control-label"> City :</label>
+																			<div class="col-md-4">
+																				<input type="text" placeholder="City : " class="form-control text-center" id="City" value="<%= EditClient.City %>">
+																			</div>
+																		</div>
+																		<div class="form-group">
+																			<label for="Street" class="col-md-2 control-label"> Street :</label>
+																			<div class="col-md-4">
+																				<input type="text" placeholder="Street : " class="form-control text-center" id="Street" value="<%= EditClient.Street %>">
+																			</div>
+																			<label for="Building" class="col-md-2 control-label"> Building :</label>
+																			<div class="col-md-4">
+																				<input type="text" placeholder="Building : " class="form-control text-center" id="Building" value="<%= EditClient.Building %>">
+																			</div>
+																		</div>
+																		<div class="form-group">
+																			<label for="Floor" class="col-md-2 control-label"> Floor :</label>
+																			<div class="col-md-4">
+																				<input type="text" placeholder="Floor : " class="form-control text-center" id="Floor" value="<%= EditClient.Floor %>">
+																			</div>
+																			<label for="internalID" class="col-md-2 control-label"> InternalID :</label>
+																			<div class="col-md-4">
+																				<input type="text" placeholder="InternalID : " class="form-control text-center" id="internalID" disabled value="<%= EditClient.InternalId %>">
+																			</div>
+																		</div>
+																		<div class="form-group">
+																			<label for="EMail" class="col-md-2 control-label"> E-Mail :</label>
+																			<div class="col-md-4">
+																				<input type="text" placeholder="E-Mail : " class="form-control text-center" id="EMail" value="<%= EditClient.Email %>">
+																			</div>
+																			<label for="Phone" class="col-md-2 control-label"> Phone :</label>
+																			<div class="col-md-4">
+																				<input type="text" placeholder="Phone Number : " class="form-control text-center" id="Phone" value="<%= EditClient.Phone %>">
+																			</div>
+																		</div>
+																		
+																		<div class="form-group">
+																			<label for="Enabled" class="col-md-2 control-label"> Enabled :</label>
+																			<div class="col-md-4">
+																			<%= #if Edit.Enabled %>
+																				<button class="btn btn-success btn-xs boxMe" on-click="@this.toggleEditClientEnabled(),false">Enabled</button>
+																			<%= else %>
+																				<button class="btn btn-danger btn-xs boxMe" on-click="@this.toggleEditClientEnabled(),false">Disabled</button>
+																			<%= /if %>
+																			</div>
+																			<label for="Deleted" class="col-md-2 control-label"> Deleted :</label>
+																			<div class="col-md-4">
+																			<%= #if Edit.Deleted %>
+																				<button class="btn btn-danger btn-xs boxMe" on-click="@this.toggleEditClientDeleted(),false">True</button>
+																			<%= else %>
+																				<button class="btn btn-success btn-xs boxMe" on-click="@this.toggleEditClientDeleted(),false">False</button>
+																			<%= /if %>
+																			</div>
+																		</div>
+																		<div class="form-group">
+																			<div class="col-md-10 col-md-offset-1">
+																				<button class="btn btn-primary btn-xs boxMe" on-click="@this.EditClient('Update'),false">Update</button>
+																				<button class="btn btn-default btn-xs boxMe" on-click="@this.EditClient('Reset'),false">Reset</button>
+																			</div>
+																		</div>
+																	</form>
 																</div>
 															</div>
 														</div>
@@ -471,8 +580,10 @@ Welcome {{ theUser.firstName }} {{ theUser.lastName }}
 					/*
 						USRGOTCLIENT should return a single record of the desired Client 
 					*/
-					//var TheClient=JSON.parse(CryptoJS.AES.decrypt(data['USRGOTCLIENT'],enc).toString(CryptoJS.enc.Utf8))
-					bodyContent.set('EditClient',JSON.parse(CryptoJS.AES.decrypt(data['USRGOTCLIENT'],enc).toString(CryptoJS.enc.Utf8)))
+					var TheClient=JSON.parse(CryptoJS.AES.decrypt(data['USRGOTCLIENT'],enc).toString(CryptoJS.enc.Utf8))
+					TheClient['createdAt']=moment(TheClient['createdAt']['$date'],'x').toString() || moment()
+					TheClient['updatedAt']=moment(TheClient['updatedAt']['$date'],'x').toString() || moment()
+					bodyContent.set('EditClient',TheClient)
 					$('#EditUserTabs a[href="#ClientEdit"]').tab('show')
 				}
 			}

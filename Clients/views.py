@@ -52,23 +52,33 @@ def index(request):
                 # and get the Valid lgnUser denoting the current User logging In .
                 
                 decryptedValuesJson=parse_qs(decryptedValues)
-                print "Loads >"
-                print decryptedValues
-                pp.pprint(decryptedValuesJson)
-                print "Loads <"
+                #print "Loads >"
+                #print decryptedValues
+                #pp.pprint(decryptedValuesJson)
+                #print "Loads <"
                 # Now We have The lgnName,lgnPass We should get the current document in the server.
                 theUser=user.objects(lgnName=decryptedValuesJson['lgnName'][0].strip(),lgnPass=decryptedValuesJson['lgnPass'][0].strip())
                 if theUser.count() == 1:
                     print "Horray We have Record"
                     # we choose to get index Array[0] since the return of as_pymongo is an array of objects.
                     theUserDetailed=theUser[0]
-                    pp.pprint(dir(theUserDetailed))
-                    # Next we set our session['LoggedIn']= True
                     request.session['LoggedIn']=True
                     request.session['theUserID']=str(theUserDetailed.id)
-                    request.session.save()
+                    request.session.save()                    
+                    if theUserDetailed['isAdmin'] == True:
+                        print("We Have  An Admin Login")
+                        return render(request,'index.html',{'theUser':theUserDetailed})
+                    elif theUserDetailed['isDealer'] == True:
+                        print("We Have A Dealer Login")
+                        return render(request,'dealer_index.html',{'theUser':theUserDetailed})
+                    else:
+                        print("We Have A Login Of {}".format(theUserDetailed['isClient']) )
+                        return render(request,'client_index.html',{'theUser':theUserDetailed})
+                    #pp.pprint(dir(theUserDetailed))
+                    # Next we set our session['LoggedIn']= True
+                    
                     # We should Take Note also to use the Value in here within to declare page generation (01/06/2017)
-                    return render(request,'index.html',{'theUser':theUserDetailed})
+                    #return render(request,'index.html',{'theUser':theUserDetailed})
             except Exception,e:
                 pp.pprint(e)
                 print "Due To The Error Above We are redirecting Back to Home Page"

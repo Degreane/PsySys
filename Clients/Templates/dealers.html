@@ -313,7 +313,15 @@ Welcome {{ theUser.firstName }} {{ theUser.lastName }}
 															<%= /if %>
 														</div>
 														<div class="tab-pane fade" id="ClientEdit">
-															
+															<div class="panel panel-success">
+																<div class="panel-heading">
+																	<button type="button" class="close" on-click="@this.CloseClientEdit(),false"><i class="fa fa-times-circle" aria-hidden="true"></i></button>
+																	<h3 class="panel-title">Editing Client ( <span class="logo"><%= EditClient.firstName %> <%= EditClient.lastName %></span> )</h3>
+																</div>
+																<div class="panel-body">
+																	
+																</div>
+															</div>
 														</div>
 													</div>
 												</div>
@@ -465,6 +473,7 @@ Welcome {{ theUser.firstName }} {{ theUser.lastName }}
 					*/
 					//var TheClient=JSON.parse(CryptoJS.AES.decrypt(data['USRGOTCLIENT'],enc).toString(CryptoJS.enc.Utf8))
 					bodyContent.set('EditClient',JSON.parse(CryptoJS.AES.decrypt(data['USRGOTCLIENT'],enc).toString(CryptoJS.enc.Utf8)))
+					$('#EditUserTabs a[href="#ClientEdit"]').tab('show')
 				}
 			}
 			var navBarBrand = new Ractive({
@@ -577,6 +586,12 @@ Welcome {{ theUser.firstName }} {{ theUser.lastName }}
 					myThis.set('Edit',false)
 					myThis.set('EditPlans',false)
 					myThis.set('PlansForUser',false)
+					myThis.set('EditClient',false)
+				},
+				CloseClientEdit:function(){
+					var myThis=this
+					$('#EditUserTabs a[href="#ClientsEdit"]').tab('show')
+					myThis.set('EditClient',false)
 				},
 				AddPlan:function(){
 					/*

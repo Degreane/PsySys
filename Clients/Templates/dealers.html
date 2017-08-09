@@ -119,7 +119,7 @@ Welcome {{ theUser.firstName }} {{ theUser.lastName }}
 														<ul class="nav nav-tabs" id="EditUserTabs">
 															<li class="active"><a href="#PersonalEdit" data-toggle="tab">Main</a></li>
 															<li><a href="#PlanEdit" data-toggle="tab">Plans</a></li>
-															<li><a href="#ClientsEdit" data-toggle="tab">Clients</a></li>
+															<li><a href="#ClientsEdit" data-toggle="tab" on-click="@this.fetchClients()">Clients</a></li>
 														</ul>
 													</span>
 													<div class="tab-content">
@@ -293,11 +293,16 @@ Welcome {{ theUser.firstName }} {{ theUser.lastName }}
 																<%= /if %>
 															</div>
 														</div>
-														<div class="tab-pane fade" id="ClientsEdit">
+														<div class="tab-pane fade" id="ClientsEdit" >
 															<!-- 
 																Here We should populate the Clients that are associated with this Dealer
+																fetchClients above should bring all the clients that belongs to this dealer.
 															!-->
-															Clients Go Here 
+															<%= #if Clients %>
+																<datatable data='<%= Clients %>' columns="ClientsColumnsConfig" dynamicColumns=false selectionMode='row' perpage='30'>
+																
+																</datatable>
+															<%= /if %>
 														</div>
 													</div>
 												</div>
@@ -419,6 +424,12 @@ Welcome {{ theUser.firstName }} {{ theUser.lastName }}
 							Continue With Error MSG verdict from the server to display the Error.
 						*/
 					}
+				}else if(data.hasOwnProperty('USRGOTCLIENTS')){
+					/*
+						USRGOTCLIENTS should return the list of clients enabled for this dealer.
+					*/
+					var USRClients=JSON.parse(CryptoJS.AES.decrypt(data['USRGOTCLIENTS'],enc).toString(CryptoJS.enc.Utf8))
+					bodyContent.set('Clients',USRClients)
 				}
 			}
 			var navBarBrand = new Ractive({
@@ -462,7 +473,8 @@ Welcome {{ theUser.firstName }} {{ theUser.lastName }}
 					show	: 	false,
 					Edit	:	false,
 					PlansForUser	:	false,
-					EditPlans	:	false
+					EditPlans	:	false,
+					Clients		:	false
 				},
 				computed: {
 					columns	:	function(){
@@ -482,6 +494,18 @@ Welcome {{ theUser.firstName }} {{ theUser.lastName }}
 								'id'		: 	{display:false},
 								'Desc'		:	{Desc:'Description'},
 								'Act'		:	{}
+							}
+					},
+					ClientsColumnsConfig: function(){
+					
+							return {
+								'Name'		:{},
+								'lgnName'	:{header:'UserName'},
+								'CreatedAt'	:{header:'Created At'},
+								'St'		:{header:'Status'},
+								'id'		:{display:false},
+								'Enabled'	:{display:false},
+								'Act'		:{}		
 							}
 					}
 				},
@@ -648,6 +672,25 @@ Welcome {{ theUser.firstName }} {{ theUser.lastName }}
 					}
 					
 					console.log('Populating For ',Who['_id']['$oid'], 'Plan List Of ',JSON.stringify(Data2Send))
+					var Data2SendJS=JSON.stringify(Data2Send)
+					var Data2SendEnc=CryptoJS.AES.encrypt(Data2SendJS,enc)
+					socketIO.send(Data2SendEnc)
+				},
+				fetchClients:function(){
+					/*
+						FetchClients for the current User id.
+						first we get the UserID
+						
+					
+					*/
+					var myThis=this
+					var Who = myThis.get('Edit')
+					//console.log('fetching clients of Owner ',theID['_id']['$oid'])
+					var Data2Send={
+						'target': 'USRGETCLIENTS',
+						'Who'	: Who['_id']['$oid'],
+						'id'	: '{{ theUser.id }}'
+					}
 					var Data2SendJS=JSON.stringify(Data2Send)
 					var Data2SendEnc=CryptoJS.AES.encrypt(Data2SendJS,enc)
 					socketIO.send(Data2SendEnc)

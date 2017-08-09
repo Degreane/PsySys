@@ -191,7 +191,30 @@ def connectedChannel(message):
 			currentUpdate=copy.deepcopy(messageJSON['data'])
 			user.objects(id=dealerID).update(**currentUpdate)
 		
-		
+	if messageJSON['target'] == 'USRGETCLIENTS':
+		'''
+		ToDo Pick clients of Owner= 'Who'
+		'''
+		dealerID=messageJSON['Who']
+		clientsQuery=(Q(Owner=dealerID) &Q(isClient=True))
+		TheClients=user.objects(clientsQuery)
+		print("No. Of Clients For the User is {}".format(TheClients.count()))
+		'''
+		Check if count is > 0
+		'''
+		if TheClients.count() > 0:
+			'''
+			if > 0 then we return the to_json back to the page.
+			'''
+			encryptedMSG=b64encode(encrypt(TheClients.to_json(),encKey))
+			message.reply_channel.send({
+			        'text':json.dumps({'USRGOTCLIENTS':encryptedMSG})
+			})
+		else :
+			encryptedMSG=b64encode(encrypt(json.dumps({'NoOfClients':0}),encKey))
+			message.reply_channel.send({
+			        'text':json.dumps({'USRGOTNOCLIENTS':encryptedMSG})
+			})
 	
 @channel_and_http_session
 def connectChannelid(message):

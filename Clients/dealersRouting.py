@@ -183,14 +183,35 @@ def connectedChannel(message):
 		# ToDo Allow Updating Plans Here 
 		#print("The Data {}".format(messageJSON['data']))
 		dealerID=messageJSON['Who']
-		print("The ID To Be Fetched is {}".format(dealerID))
+		#print("The ID To Be Fetched is {}".format(dealerID))
 		idQuery=Q(id=dealerID)
 		idFetch=user.objects(idQuery)
-		print(" The ID Fetched is {} {}".format(idFetch[0],messageJSON['data']))
+		#print(" The ID Fetched is {} {}".format(idFetch[0],messageJSON['data']))
 		if idFetch.count() > 0:
 			currentUpdate=copy.deepcopy(messageJSON['data'])
 			user.objects(id=dealerID).update(**currentUpdate)
-		
+	if messageJSON['target'] == 'USRUPDTCLIENT':
+		# ToDo 
+		'''
+		Who = The Client ID To Update.
+		data = The data that needs to be updated.
+		We Have An Error in currentUpdate['Expires'] that should be fixed  datetime.datetime.fromtimestamp(1493510400000/1000.0) (REF: https://stackoverflow.com/questions/21787496/converting-epoch-time-with-milliseconds-to-datetime)
+
+		'''
+		clientID=messageJSON['Who']
+		idQuery=Q(id=clientID)
+		idFetch=user.objects(idQuery)
+		if idFetch.count() > 0:
+			currentUpdate=copy.deepcopy(messageJSON['data'])
+			del currentUpdate['_id']
+			currentUpdate['updatedAt']=datetime.datetime.now()
+			if currentUpdate.has_key('InternalId'):
+				del currentUpdate['InternalId']
+			if currentUpdate.has_key('createdAt'):
+				del currentUpdate['createdAt']
+			if currentUpdate.has_key('Expires'):
+				del currentUpdate['Expires']
+			user.objects(id=clientID).update(**currentUpdate)
 	if messageJSON['target'] == 'USRGETCLIENTS':
 		'''
 		Done Pick clients of Owner= 'Who'

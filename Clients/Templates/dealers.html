@@ -319,25 +319,53 @@ Welcome {{ theUser.firstName }} {{ theUser.lastName }}
 																<div class="panel-body">
 																	<form class="form-horizontal">
 																		<div class="form-group">
-																			<label for="firstName" class="col-md-2 control-label">First Name :</label>
+																			<label for="ClientfirstName" class="col-md-2 control-label">First Name :</label>
 																			<div class="col-md-4">
-																				<input type="text" placeholder="First Name :" class="form-control text-center" id="firstName" value="<%= EditClient.firstName %>">
+																				<input type="text" placeholder="First Name :" class="form-control text-center" id="ClientfirstName" value="<%= EditClient.firstName %>">
 																			</div>
-																			<label for="lastName" class="col-md-2 control-label">Last Name :</label>
+																			<label for="ClientlastName" class="col-md-2 control-label">Last Name :</label>
 																			<div class="col-md-4">
-																				<input type="text" placeholder="Last Name :" class="form-control text-center" id="lastName" value="<%= EditClient.lastName %>">
+																				<input type="text" placeholder="Last Name :" class="form-control text-center" id="ClientlastName" value="<%= EditClient.lastName %>">
 																			</div>
 																		</div>
 																		<div class="form-group">
-																			<label for="UserName" class="col-md-2 control-label">UserName :</label>
+																			<label for="ClientUserName" class="col-md-2 control-label">UserName :</label>
 																			<div class="col-md-4">
-																				<input type="text" placeholder="UserName :" class="form-control text-center" id="UserName" value="<%= EditClient.lgnName %>">
+																				<input type="text" placeholder="UserName :" class="form-control text-center" id="ClientUserName" value="<%= EditClient.lgnName %>">
 																			</div>
-																			<label for="PassWord" class="col-md-2 control-label">PassWord :</label>
+																			<label for="ClientPassWord" class="col-md-2 control-label">PassWord :</label>
 																			<div class="col-md-4">
-																				<input type="password" placeholder="PassWord :" class="form-control text-center" id="PassWord" value="<%= EditClient.lgnPass %>">
+																				<input type="password" placeholder="PassWord :" class="form-control text-center" id="ClientPassWord" value="<%= EditClient.lgnPass %>">
 																			</div>
 																		</div>
+																		<div class="form-group">
+																			<label for="IpAddress" class="col-md-2 control-label">Ip Address :</label>
+																			<div class="col-md-4">
+																				<input type="text" placeholder="Ip Address :" class="form-control text-center" id="IpAddress" value="<%= EditClient.Ip %>">
+																			</div>
+																			<label for="MacAddress" class="col-md-2 control-label">MAC Address :</label>
+																			<div class="col-md-4">
+																				<input type="text" placeholder="MAC Address :" class="form-control text-center" id="MacAddress" value="<%= EditClient.MAC %>">
+																			</div>
+																		</div>
+																		
+																		<div class="form-group boxMe bg-lav boxed">
+																			<label for="ServicePlan" class="col-md-2 control-label">Service Plan :</label>
+																			<div class="col-md-4">
+																				<input type="hidden" value="<%= EditClient.Plans.0.id %>">
+																				<input type="text" placeholder="Service Plan :" class="form-control text-center" id="IpAddress" value="<%= EditClient.Plans.0.Name %>" disabled>
+																			</div>
+																			<label for="ChangeServicePlan" class="col-md-2 control-label">Change Plan :</label>
+																			<div class="col-md-4">
+																				<select class="form-control" id="PlansInSystemForClient">
+																					<%= #each PlansForUser %>
+																						<option value="<%= _id.$oid %>"><%= Name %></option>
+																					<%= /each %>
+																				</select>
+																				<button class="btn btn-default btn-xs boxMe" on-click="@this.UpdateEditClientPlan(),false">Change Plan</button>
+																			</div>
+																		</div>
+																		
 																		<div class="form-group">
 																			<label for="Desc" class="col-md-2 control-label"> Description :</label>
 																			<div class="col-md-10">
@@ -426,6 +454,20 @@ Welcome {{ theUser.firstName }} {{ theUser.lastName }}
 																				<button class="btn btn-default btn-xs boxMe" on-click="@this.UpdateEditClient('Reset'),false">Reset</button>
 																			</div>
 																		</div>
+																		<%= #if EditClientErr %>
+																			<div class="col-md-12">
+																				<div class="alert alert-danger" role="danger">
+																					<%% EditClientErr %%>
+																				</div>
+																			</div>
+																			<%= /if %>
+																			<%= #if EditClientSuccess %>
+																			<div class="col-md-12">
+																				<div class="alert alert-info" role="info">
+																					<%% EditClientSuccess %%>
+																				</div>
+																			</div>
+																		<%= /if %>
 																	</form>
 																</div>
 															</div>
@@ -574,7 +616,8 @@ Welcome {{ theUser.firstName }} {{ theUser.lastName }}
 							'Status':Status,
 							'Enabled':item.Enabled,
 							'Ip':item.Ip,
-							'MAC':item.MAC
+							'MAC':item.MAC,
+							'Plans':item.Plans[0].Name
 						}
 					})
 					//console.log(USRClients)
@@ -587,6 +630,7 @@ Welcome {{ theUser.firstName }} {{ theUser.lastName }}
 					TheClient['createdAt']=moment(TheClient['createdAt']['$date'],'x').toString() || moment()
 					TheClient['updatedAt']=moment(TheClient['updatedAt']['$date'],'x').toString() || moment()
 					bodyContent.set('EditClient',TheClient)
+					//console.log(TheClient)
 					$('#EditUserTabs a[href="#ClientEdit"]').tab('show')
 				}
 			}
@@ -666,6 +710,7 @@ Welcome {{ theUser.firstName }} {{ theUser.lastName }}
 								'Status'	:{header:'Status'},
 								'id'		:{display:false},
 								'Enabled'	:{display:false},
+								'Plans'		:{header:'Service Plan'},
 								'Act'		:{}		
 							}
 					}
@@ -698,11 +743,16 @@ Welcome {{ theUser.firstName }} {{ theUser.lastName }}
 					console.log(Who)
 				},
 				toggleEditClientEnabled:function(){
-				
-				
+					var myThis=this
+					myThis.set('EditClient.Enabled',!myThis.get('EditClient.Enabled'))
 				},
 				toggleEditClientDeleted:function(){
-				
+					var myThis=this
+					var Deleted=myThis.get('EditClient.Deleted')
+					if(Deleted == false){
+						myThis.set('EditClient.Enabled',false)
+					}
+					myThis.set('EditClient.Deleted',!myThis.get('EditClient.Deleted'))
 				},
 				CloseEdit:function(){
 					var myThis=this;
@@ -787,14 +837,14 @@ Welcome {{ theUser.firstName }} {{ theUser.lastName }}
 					myThis.set('EditSuccess',false)
 					myThis.set('EditErr',false)
 					if (What=='Reset'){
-						console.log('Editdmin => Resetting ...')
+						//console.log('Editdmin => Resetting ...')
 						socketIO.send(CryptoJS.AES.encrypt(JSON.stringify({'id':'{{ theUser.id }}','target':'USR','Who':Who['_id']['$oid']}),enc))
 					}else if (What == 'Update'){
 						/*
 							1- check if lgnName||lgnPass are empty
 						*/
 						var EditErr=false
-						console.log('Editdmin => Updating ...')
+						//console.log('Editdmin => Updating ...')
 						if(Who['lgnName'].trim().length == 0 ){
 							EditErr="<a href='#UserName'>LogIn</a> Must be specified<br>"
 						}
@@ -833,6 +883,8 @@ Welcome {{ theUser.firstName }} {{ theUser.lastName }}
 					*/
 					var myThis=this
 					var Who=myThis.get('EditClient')
+					myThis.set('EditClientErr',false)
+					myThis.set('EditClientSuccess',false)
 					if (What == 'Reset'){
 						/*
 						If We have Reset then we just send request to get this certain Client back.
@@ -840,8 +892,83 @@ Welcome {{ theUser.firstName }} {{ theUser.lastName }}
 						//console.log('Resetting Client ',Who)
 						socketIO.send(CryptoJS.AES.encrypt(JSON.stringify({'id':'{{ theUser.id }}','target':'USRGETCLIENT','Who':Who['_id']['$oid']}),enc))
 					}else if (What == 'Update'){
-						console.log('Updating Client ',Who)
+						/*
+							Here We Have UpdateClient 
+							id => the Admin who is triggeruing the Update {{ theUser.id }}
+							target => USRUPDTCLIENT
+							Who => The is of the CLient to be updated.
+							data => the client record to be updated.
+							1- Check if UserName is valid. (Warn)
+							2- Check if password is present (Warn)
+							3- Check if Ip Address is present (Warn)
+							4- Check if Mac Address is Present. (Warn)
+						*/
+						var Error=false
+						if (Who['firstName'].trim().length + Who['lastName'].trim().length == 0){
+							Error="Either<a href='#ClientfirstName'>FirstName</a> Or <a href='#ClientlastName'>LastName</a> Not Set<br>"
+						}
+						if (Who['lgnName'].trim().length == 0){
+							if (Error == false){
+								Error="<a href='#ClientUserName'>LogIn</a> Not Set<br>"
+							}else{
+								Error+="<a href='#ClientUserName'>LogIn</a> Not Set<br>"
+							}
+						}
+						if (Who['lgnPass'].trim().length == 0){
+							if (Error == false){
+								Error="<a href='#ClientPassWord'>PassWord</a> Not Set<br>"
+							}else {
+								Error+="<a href='#ClientPassWord'>PassWord</a> Not Set<br>"
+							}
+						}
+						if(Who['Ip'].trim().length == 0){
+							if (Error == false){
+								Error="<a href='#IpAddress'>Ip Address</a> Not Set<br>"
+							}else {
+								Error+="<a href='#IpAddress'>Ip Address</a> Not Set<br>"
+							}
+						}
+						if(Who['MAC'].trim().length == 0){
+							if (Error == false){
+								Error="<a href='#MacAddress'>MAC Address</a> Not Set<br>"
+							}else {
+								Error+="<a href='#MacAddress'>MAC Address</a> Not Set<br>"
+							}
+						}
+						myThis.set('EditClientErr',Error)
+						var Data2Send = {
+							'id'		:'{{ theUser.id }}',
+							'target'	:'USRUPDTCLIENT',
+							'Who'		:Who['_id']['$oid'],
+							'data'		:Who
+						}
+						var Data2SendJS=JSON.stringify(Data2Send)
+						var Data2SendEnc=CryptoJS.AES.encrypt(Data2SendJS,enc)
+						socketIO.send(Data2SendEnc)
+						
 					}
+				},
+				UpdateEditClientPlan:function(){
+					/*
+						Doing So Should Update the selected Client Plan
+						1- Get The Selected Plan ID.
+						2- Get The Record For The Selected Plan from The Available Plans For Dealer (PlansForUser)
+						
+					*/
+					var myThis=this;
+					//1- Getting Selected Plan 
+					var selectedPlan=$('#PlansInSystemForClient').val()
+					var PlansForUser=myThis.get('PlansForUser')
+					var PlanRecord=_.filter(PlansForUser,function(ThePlan){
+						if (ThePlan['_id']['$oid'] == selectedPlan){
+							return true
+						}else{
+							return false
+						}
+					})
+					//console.log('The Selected Plan To Be Updated is ',PlanRecord)
+					myThis.set('EditClient.Plans',PlanRecord)
+					
 				},
 				savePlans:function(){
 					/*

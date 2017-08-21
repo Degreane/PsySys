@@ -5,3 +5,34 @@
 Welcome {{ theUser.firstName }} {{ theUser.lastName }} 
 
 {% endblock %}
+{% block lgnInlgnOut %} <li><a href="/LogOut" id="lgnOut" class="logo" >LogOut <i class="fa fa-sign-out" aria-hidden="true"></i></a></li> {% endblock %}
+{% block socket_script %}
+	<script type="text/javascript">
+		var socketIO = new ReconnectingWebSocket('ws://' + window.location.host+'/currentdlr/')
+		var enc=null
+		var genUID = function(){
+			var sGuid="";for(i=0;i<16;i++){
+				sGuid += Math.floor(Math.random()*0xF).toString(0xF)
+			}
+			return sGuid
+		}
+		setInterval(function(){
+			if (enc !== null){
+				socketIO.send(CryptoJS.AES.encrypt(JSON.stringify({"CHKCONN":moment().toString(),"target":'CHK'}),enc))
+			}else {
+				window.location='/'
+			}
+		},60000)
+	</script>
+{% endblock %}
+{% block navbar_brand %} <span id="NavBarBrand">  </span> {% endblock %}
+{% block ractive_html %}
+	<script id="NavBarBrandTpl" type="text/ractive-x">
+		<a class="navbar-brand logo" href="#" on-click="@this.ViewCU(),false">
+			<%= CU.lgnName %>
+		</a>
+	</script>
+{% endblock %}
+{% block ractive_js %} 
+
+{% endblock %}

@@ -18,6 +18,7 @@ from django.contrib import admin
 from django.conf.urls import include
 from Clients import views as BaseAdySys
 from Clients import dealersViews as dlrV
+from Clients import currentdealersViews as currdlrV
 from AdySys import views as Generic
 import os
 
@@ -28,7 +29,8 @@ urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^login.sys$',Generic.index,name="login"),
     url(r'^LogOut',Generic.logout),
-    url(r'^dealers',dlrV.index)
+    url(r'^dealers',dlrV.index),
+    #url(r'^currentDealerView',currdlrV.index)
     #url("", include('django_socketio.urls'))
 ]
 try :

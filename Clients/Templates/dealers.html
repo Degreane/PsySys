@@ -303,9 +303,7 @@ Welcome {{ theUser.firstName }} {{ theUser.lastName }}
 															!-->
 															<%= #if Clients %>
 																<datatable data='<%= Clients %>' columns="<%= ClientsColumnsConfig %>" dynamicColumns=false selectionMode='row' perpage='30'>
-																	<%= #partial St %>
-																		<a href="#" on-click="@this.parent.toggleClientED(this),false"><%% this.Status %%></a>
-																	<%= /partial %>
+																	
 																	<%= #partial Act %>
 																		<a href="#" on-click="@this.parent.EditClient(this),false"><button class="btn btn-xs btn-info boxMe btnFnt">Edit</button></a>
 																	<%= /partial %>
@@ -407,7 +405,7 @@ Welcome {{ theUser.firstName }} {{ theUser.lastName }}
 																		<div class="form-group">
 																			<label for="Enabled" class="col-md-2 control-label"> Enabled :</label>
 																			<div class="col-md-4">
-																			<%= #if Edit.Enabled %>
+																			<%= #if EditClient.Enabled %>
 																				<button class="btn btn-success btn-xs boxMe" on-click="@this.toggleEditClientEnabled(),false">Enabled</button>
 																			<%= else %>
 																				<button class="btn btn-danger btn-xs boxMe" on-click="@this.toggleEditClientEnabled(),false">Disabled</button>
@@ -415,7 +413,7 @@ Welcome {{ theUser.firstName }} {{ theUser.lastName }}
 																			</div>
 																			<label for="Deleted" class="col-md-2 control-label"> Deleted :</label>
 																			<div class="col-md-4">
-																			<%= #if Edit.Deleted %>
+																			<%= #if EditClient.Deleted %>
 																				<button class="btn btn-danger btn-xs boxMe" on-click="@this.toggleEditClientDeleted(),false">True</button>
 																			<%= else %>
 																				<button class="btn btn-success btn-xs boxMe" on-click="@this.toggleEditClientDeleted(),false">False</button>
@@ -424,8 +422,8 @@ Welcome {{ theUser.firstName }} {{ theUser.lastName }}
 																		</div>
 																		<div class="form-group">
 																			<div class="col-md-10 col-md-offset-1">
-																				<button class="btn btn-primary btn-xs boxMe" on-click="@this.EditClient('Update'),false">Update</button>
-																				<button class="btn btn-default btn-xs boxMe" on-click="@this.EditClient('Reset'),false">Reset</button>
+																				<button class="btn btn-primary btn-xs boxMe" on-click="@this.UpdateEditClient('Update'),false">Update</button>
+																				<button class="btn btn-default btn-xs boxMe" on-click="@this.UpdateEditClient('Reset'),false">Reset</button>
 																			</div>
 																		</div>
 																	</form>
@@ -482,11 +480,11 @@ Welcome {{ theUser.firstName }} {{ theUser.lastName }}
 					var myList=_.map(theList,function(item){
 						var Status='<button class="btn btn-success btnMe btn-xs boxMe btnFnt">Enabled</button>'
 						if (item['Enabled']==true){
-							Status='<button class="btn btn-success btnMe btn-xs boxMe btnFnt">Enabled</button>'
+							Status='<button class="btn btn-success btnMe btn-xs boxMe btnFnt" on-click="@this.parent.toggleClientED(this),false" >Enabled</button>'
 						}else if(item['Enabled'] == false && item['Deleted'] == true){
-							Status="<button class='btn btn-danger btnMe btn-xs boxMe btnFnt'>Deleted</button>"
+							Status="<button class='btn btn-danger btnMe btn-xs boxMe btnFnt' on-click='@this.parent.toggleClientED(this),false'>Deleted</button>"
 						}else if(item['Enabled'] == false && item['Deleted'] == false){
-							Status="<button class='btn btn-danger btnMe btn-xs boxMe btnFnt'>Disabled</button>"
+							Status="<button class='btn btn-danger btnMe btn-xs boxMe btnFnt' on-click='@this.parent.toggleClientED(this),false'>Disabled</button>"
 						}
 						return {
 							'Name':item.firstName +' '+item.lastName,
@@ -547,6 +545,9 @@ Welcome {{ theUser.firstName }} {{ theUser.lastName }}
 						var W=bodyContent.get('show')
 						socketIO.send(CryptoJS.AES.encrypt(JSON.stringify({'target':'DLRS','id':'{{theUser.id}}','type':W}),enc))
 						socketIO.send(CryptoJS.AES.encrypt(JSON.stringify({'id':'{{ theUser.id }}','target':'CNTS'}),enc))
+						var Who=bodyContent.get('Edit')
+						console.log('dealerUPDT => Resetting ...')
+						socketIO.send(CryptoJS.AES.encrypt(JSON.stringify({'id':'{{ theUser.id }}','target':'USR','Who':Who['_id']['$oid']}),enc))
 					}else {
 						/* ToDo
 							Continue With Error MSG verdict from the server to display the Error.
@@ -571,7 +572,9 @@ Welcome {{ theUser.firstName }} {{ theUser.lastName }}
 							'_id':item._id,
 							'lgnName':item.lgnName,
 							'Status':Status,
-							'Enabled':item.Enabled
+							'Enabled':item.Enabled,
+							'Ip':item.Ip,
+							'MAC':item.MAC
 						}
 					})
 					//console.log(USRClients)
@@ -657,8 +660,10 @@ Welcome {{ theUser.firstName }} {{ theUser.lastName }}
 							return {
 								'Name'		:{},
 								'lgnName'	:{header:'UserName'},
+								'Ip'		:{header:'Ip Address'},
+								'MAC'		:{header:'Mac Address'},
 								'CreatedAt'	:{header:'Created At'},
-								'St'		:{header:'Status'},
+								'Status'	:{header:'Status'},
 								'id'		:{display:false},
 								'Enabled'	:{display:false},
 								'Act'		:{}		
@@ -691,6 +696,13 @@ Welcome {{ theUser.firstName }} {{ theUser.lastName }}
 				},
 				toggleED:function(Who){
 					console.log(Who)
+				},
+				toggleEditClientEnabled:function(){
+				
+				
+				},
+				toggleEditClientDeleted:function(){
+				
 				},
 				CloseEdit:function(){
 					var myThis=this;
@@ -811,6 +823,24 @@ Welcome {{ theUser.firstName }} {{ theUser.lastName }}
 						}else{
 							myThis.set('EditErr',EditErr)
 						}
+					}
+				},
+				UpdateEditClient:function(What){
+					/*
+						What is one Of :
+							Update
+							Reset
+					*/
+					var myThis=this
+					var Who=myThis.get('EditClient')
+					if (What == 'Reset'){
+						/*
+						If We have Reset then we just send request to get this certain Client back.
+						*/
+						//console.log('Resetting Client ',Who)
+						socketIO.send(CryptoJS.AES.encrypt(JSON.stringify({'id':'{{ theUser.id }}','target':'USRGETCLIENT','Who':Who['_id']['$oid']}),enc))
+					}else if (What == 'Update'){
+						console.log('Updating Client ',Who)
 					}
 				},
 				savePlans:function(){

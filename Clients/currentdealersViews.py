@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
 from django.shortcuts import render
@@ -31,10 +30,10 @@ def index(request):
 		if theUser.count() == 0 :
 			return HttpResponseRedirect('/')
 		else:
-			print('Dealers Views')
+			'''print('Dealers Views')
 			pp.pprint(theUser[0].firstName)
-			pp.pprint(theUser[0].lastName)
-			return render(request,'dealers.html',{'theUser':theUser[0]})
+			pp.pprint(theUser[0].lastName)'''
+			return render(request,'dealer_index.html',{'theUser':theUser[0]})
 		#return HttpResponse('<br>'.join(request.__dict__))
 	else:
 		return HttpResponseRedirect('/')

@@ -86,6 +86,7 @@ channel_routing = [
     include('Clients.routing.channel_routing',path=r'/id/index.html'),
     include('Clients.routing.channel_routing',path=r'/id/$'),
     include('Clients.dealersRouting.channel_routing',path=r'/dlr/'),
+    #include('Clients.currentDealer.channel_routing',path=r'/currentdlr/'),
     route('websocket.receive',connectedChannel),
     route('websocket.connect',connectChannel)
 ]

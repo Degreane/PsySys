@@ -97,8 +97,17 @@ def index(request):
             theUserDetailed=theUser[0]
             #pp.pprint(theUserDetailed.__dict__)
             pp.pprint(theUser.to_json())
+            if theUserDetailed['isAdmin'] == True:
+                print("We Have  An Admin Login")
+                return render(request,'index.html',{'theUser':theUserDetailed})
+            elif theUserDetailed['isDealer'] == True:
+                print("We Have A Dealer Login")
+                return render(request,'dealer_index.html',{'theUser':theUserDetailed})
+            else:
+                print("We Have A Login Of {}".format(theUserDetailed['isClient']) )
+                return render(request,'client_index.html',{'theUser':theUserDetailed})            
             # Next we set our session['LoggedIn']= True            
-            return render(request,'index.html',{'theUser':theUserDetailed})
+            #return render(request,'index.html',{'theUser':theUserDetailed})
         else:
             del request.session['LoggedIn']
             return HttpResponseRedirect('/')

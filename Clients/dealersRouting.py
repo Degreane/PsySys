@@ -195,7 +195,7 @@ def connectedChannel(message):
 		'''
 		Who = The Client ID To Update.
 		data = The data that needs to be updated.
-		We Have An Error in currentUpdate['Expires'] that should be fixed  datetime.datetime.fromtimestamp(1493510400000/1000.0) (REF: https://stackoverflow.com/questions/21787496/converting-epoch-time-with-milliseconds-to-datetime)
+		We Have An Error in currentUpdate['Expires'] that should be fixed  datetime.datetime.fromtimestamp(1493510400000/1000.0).strftime("%Y"-03-30T03:39:53.066Z) (REF: https://stackoverflow.com/questions/21787496/converting-epoch-time-with-milliseconds-to-datetime)
 
 		'''
 		clientID=messageJSON['Who']
